@@ -76,7 +76,7 @@ export const BACKEND = {
 };
 
 // Opening view (three.js coordinates: x east, y up, z south), captured from the viewer on 2026-09-10
-export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
+export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
 
 export const PARCELS = ['T1'];   // towers (one chip per tower when there are several)
 // Blender lot numbers ("Terrenos NNN") that are parks: not selectable, no tooltip, filled with trees (besides the
@@ -357,10 +357,34 @@ export const PANO_MARKERS = [
 // the sidewalk line in front of the lot (three probes 1 m outside the lot front + the kerb line)
 export const GOOGLE_TILES = { key: 'AIzaSyAuDCrJLL2HnWJJdblHvHFyllce24Iym2U', groundHeight: null, autoLevel: true, errorTarget: null,
   lot: { x: [-10.4, 13.6], y: [3.6, 28.6] }, lotMargin: 0.35, clipLot: true, skirt: true, skirtBottom: -8,
-  look: { gain: 1.4, saturation: 1.35, gamma: 0.88 }, nightTintMin: 0.42 };   // look: the photogrammetry lifted / saturated to sit with the building (user review); Maps Platform API Key (projeto GRAN RESERVA 3D), restrita aos referrers localhost:5174 / unkviewer.com / github.io e as APIs Maps
+  look: { gain: 1.45, saturation: 1.6, gamma: 0.88 }, nightTintMin: 0.42 };   // look: the photogrammetry lifted / saturated to sit with the building (user review); Maps Platform API Key (projeto GRAN RESERVA 3D), restrita aos referrers localhost:5174 / unkviewer.com / github.io e as APIs Maps
 // camera: the orbit distance is capped (the surroundings are the neighbourhood, not the region - the regional map
-// covers the far places) and after a few seconds without input the camera orbits slowly around its target
-export const CAMERA = { maxDistance: 800, orbit: { enabled: true, idleMs: 6000, speed: 0.45 } };
+// covers the far places), the target stays on the building (no panning, zoom towards the target) and after a few
+// seconds without input the camera orbits slowly around it
+export const CAMERA = { maxDistance: 800, lockTarget: true, orbit: { enabled: true, idleMs: 6000, speed: 0.45 } };
+// points of interest closer than edgeKm are pinned to the screen border when they fall out of the view
+export const POI = { edgeKm: 1.6 };
+// night lighting of the building and its street (three.js frame: x east, y up, z = -model y). Street lamps stand on the
+// sidewalk in front of the lot (their light pools mark the Google ground, which is unlit); the facade gets three
+// uplights from the podium roof; warm points in the hall, the leisure floor and the rooftop lounge; the pool glows;
+// the glass of the hall (floor 0) and of the leisure floor (floor 2) is lit like the apartments (publicPanes)
+export const NIGHT_LIGHTS = {
+  lamps: [{ x: -34, y: 1.8, nx: 0, ny: -1 }, { x: -18, y: 1.8, nx: 0, ny: -1 }, { x: -2, y: 1.8, nx: 0, ny: -1 }, { x: 14, y: 1.8, nx: 0, ny: -1 }, { x: 30, y: 1.8, nx: 0, ny: -1 }],
+  spots: [
+    { pos: [-4.0, 10.7, -5.6], target: [-4.0, 36, -7.5], color: 0xffe4bd, intensity: 900, angle: 0.30, penumbra: 0.75, distance: 70 },
+    { pos: [8.0, 10.7, -5.6], target: [8.0, 36, -7.5], color: 0xffe4bd, intensity: 900, angle: 0.30, penumbra: 0.75, distance: 70 },
+    { pos: [1.6, 6.2, -1.5], target: [1.6, 0, -6.5], color: 0xffd9a5, intensity: 320, angle: 0.55, penumbra: 0.6, distance: 30 },
+  ],
+  points: [
+    { pos: [1.6, 2.6, -5.0], color: 0xffd9a5, intensity: 60, distance: 20 },
+    { pos: [4.5, 8.6, -12.0], color: 0xffd9a5, intensity: 45, distance: 18 },
+    { pos: [5.0, 8.6, -20.5], color: 0xffd9a5, intensity: 45, distance: 18 },
+    { pos: [5.5, 41.6, -16.0], color: 0xffd9a5, intensity: 70, distance: 26 },
+    { pos: [-4.5, 41.2, -16.5], color: 0x8fdcff, intensity: 30, distance: 16 },
+  ],
+  pool: { color: 0x3fc0e6, intensity: 0.9 },
+  publicPanes: { floors: [{ floor: 0, y: [-0.2, 3.3] }, { floor: 2, y: [6.5, 10.3] }], color: 0xffe0b0, opacity: 0.95 },
+};
 // sky / sun rotation about the vertical axis (degrees): the Poly Haven HDRI has its sun in the SE (lighting the street
 // facade); turned by 68.6 deg it stands in the NE, as the real sun does at 27 S, and the shadows fall to the SW like the
 // baked shadows of the Google imagery (user review 2026-09-11)

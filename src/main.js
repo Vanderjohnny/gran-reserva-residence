@@ -15,15 +15,15 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // internal modules carry a version query so browsers never pair a new main.js with a cached old module
-import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA } from './config.js?v=32';
-import { createPanoPlayer } from './pano.js?v=32';   // GRANRESERVA-MAIN
-import { createTour } from './tour.js?v=32';   // GRANRESERVA-MAIN2
-import { api } from './api.js?v=32';
-import { createNight } from './night.js?v=32';
-import { createCars } from './cars.js?v=32';
-import { createRegionMap } from './region.js?v=32';
-import { createPois } from './poi.js?v=32';
-import { createPlanes } from './planes.js?v=32';
+import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI } from './config.js?v=34';
+import { createPanoPlayer } from './pano.js?v=34';   // GRANRESERVA-MAIN
+import { createTour } from './tour.js?v=34';   // GRANRESERVA-MAIN2
+import { api } from './api.js?v=34';
+import { createNight } from './night.js?v=34';
+import { createCars } from './cars.js?v=34';
+import { createRegionMap } from './region.js?v=34';
+import { createPois } from './poi.js?v=34';
+import { createPlanes } from './planes.js?v=34';
 
 const THREE_VERSION = '0.170.0';
 const ASSET_V = '2026-09-11a';   // bump when models/textures change so browsers do not keep stale copies
@@ -110,6 +110,7 @@ controls.minDistance = 12;
 controls.maxDistance = (CAMERA && CAMERA.maxDistance) || 26000;   // GRANRESERVA-MAIN5: the neighbourhood only; the regional map covers the far places
 controls.maxPolarAngle = THREE.MathUtils.degToRad(84);
 controls.zoomToCursor = true;
+if (CAMERA && CAMERA.lockTarget) { controls.enablePan = false; controls.zoomToCursor = false; }   // GRANRESERVA-MAIN6: the camera stays on the building
 
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;   // replaced by the sky HDRI once loaded
@@ -309,7 +310,7 @@ async function init() {
   if (ground) setupGround(ground.scene);
   buildPavedGrid();
   completeHedges();
-  if (state.isBuilding) { setupBuilding(modelGltfs[0]); if (modelGltfs[1]) setupContext(modelGltfs[1].scene); setupLitUnits(); setupPanoMarkers(); setupTiles3D(); }
+  if (state.isBuilding) { setupBuilding(modelGltfs[0]); if (modelGltfs[1]) setupContext(modelGltfs[1].scene); setupLitUnits(); setupNightLights(); setupPanoMarkers(); setupTiles3D(); setupContext3D(); }
   else if (mergedHouses) {
     // Blender exports every scene of the .blend; find each body by its node name across all scenes
     for (let i = 1; i <= 6; i++) {
@@ -319,7 +320,7 @@ async function init() {
     }
   } else modelGltfs.forEach((g, idx) => setupHouseModel(idx + 1, g.scene, data.models[idx + 1]));
   if (data.species && data.species.length) await buildTrees(data);
-  night = createNight({ scene, renderer, camera, controls, getCsm: () => csm, hemi, treeGroup, worldGround, satMeshes, HORIZON, pmrem, isTouch: IS_TOUCH, lots: state.lots, lotByHouse: state.lotByHouse, pavedClass, models, rebuildInstances, sunDir: SUN_DIR, onTime, siteBounds: state.data.bounds, airport: state.airport, runway: runwayCentreline(state.airport), glassMats });
+  night = createNight({ scene, renderer, camera, controls, getCsm: () => csm, hemi, treeGroup, worldGround, satMeshes, HORIZON, pmrem, isTouch: IS_TOUCH, lots: state.lots, lotByHouse: state.lotByHouse, pavedClass, models, rebuildInstances, sunDir: SUN_DIR, onTime, lampPositions: (NIGHT_LIGHTS && NIGHT_LIGHTS.lamps) || [], siteBounds: state.data.bounds, airport: state.airport, runway: runwayCentreline(state.airport), glassMats });
   night.build();
   cars = createCars({ scene, loadGLB, pavedClass, pavedGrid: paved, debug: /carsdebug/.test(location.search), paintGeometries: groundMeshes.filter((o) => (Array.isArray(o.material) ? o.material[0] : o.material) === MATS.paint).map((o) => o.geometry), isTouch: IS_TOUCH });
   state.carReport = await cars.build();
@@ -335,7 +336,7 @@ async function init() {
   if (INTRO && INTRO.enabled && !location.hash && !matchMedia('(prefers-reduced-motion: reduce)').matches) prepareIntro(); else setOverview(true);
   // compile the night-only shaders now (asynchronously) so the first Day/Night toggle does not stall
   try { night.setTime(1); await renderer.compileAsync(scene, camera); night.setTime(0); await renderer.compileAsync(scene, camera); } catch (e) { night.setTime(0); }
-  pois = createPois({ scene, camera, layer: $('poi-layer'), card: $('poi-card'), tooltip, doc: state.poiDoc, t, lang: () => state.lang, siteCentre: siteCenter(), flyTo, openMap: (p) => openRegionMap(p), onSelect: (p) => { if (regionMap) regionMap.selectPoi(p, false, true); } });
+  pois = createPois({ scene, camera, layer: $('poi-layer'), card: $('poi-card'), tooltip, doc: state.poiDoc, t, lang: () => state.lang, siteCentre: siteCenter(), flyTo, edgeKm: (POI && POI.edgeKm) || 0, openMap: (p) => openRegionMap(p), onSelect: (p) => { if (regionMap) regionMap.selectPoi(p, false, true); } });
   loadingEl.classList.add('done');
   setTimeout(() => loadingEl.remove(), 900);
   if (introPending) startIntro();
@@ -2016,6 +2017,7 @@ function setupContext(root) {   // GRANRESERVA-MAIN3
 // warm windows on the neighbouring houses at night: 2-4 squares per building on its longest wall segments
 let neighbourWindows = null;
 function buildNeighbourWindows(doc) {
+  if (neighbourWindows) { scene.remove(neighbourWindows); neighbourWindows.geometry.dispose(); neighbourWindows = null; }   // rebuilt on the sampled heights (context3d)
   const list = (doc && doc.buildings) || []; if (!list.length) return;
   const items = [];
   for (const b of list) {
@@ -2046,9 +2048,11 @@ async function setupTiles3D() {
   const georef = state.satMeta && state.satMeta.georef;
   if (!GOOGLE_TILES.key || !georef) return;
   try {
-    const { createTiles3D } = await import('./tiles3d.js?v=32');
-    tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH,
-      onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d'); },
+    const { createTiles3D } = await import('./tiles3d.js?v=34');
+    tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH && Math.min(window.innerWidth, window.innerHeight) < 820,
+      onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d');
+        if (context3d) { context3d.build([tiles3d.group, contextGroup]); for (const ms of [7000, 16000]) setTimeout(() => { if (context3d && tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); }, ms); }
+        relevelLamps(); setTimeout(relevelLamps, 9000); },
       onSkirt: (mesh) => { setupShaded(mesh.material); },
       onFail: () => { tiles3d = null; },
       onAttribution: (txt) => { const el = $('credits-google'); if (el) el.textContent = txt ? ` · 3D: Google, ${txt}` : ''; } });
@@ -2058,7 +2062,7 @@ async function setupTiles3D() {
 // inside a unit box (not the balcony railings on its edge) get a warm quad just behind the glass. 55 % of the units are
 // lit and, in a lit unit, 65 % of the panes: a few windows here and there, like a real evening.
 const LIT = { color: 0xffd2a0, unitShare: 0.55, paneShare: 0.65, inset: 0.18 };
-let litWindows = null;
+let litWindows = null, publicWindows = null, nightLights = null, context3d = null, poolMats = [];
 function setupLitUnits() {
   const root = scene.getObjectByName('building') || scene;
   const glass = [];
@@ -2072,7 +2076,10 @@ function setupLitUnits() {
     }
     return null;
   };
-  const panes = [];
+  const panes = [], publicPanes = [];   // GRANRESERVA-MAIN6: hall + leisure glass, lit every night
+  const PUB = (NIGHT_LIGHTS && NIGHT_LIGHTS.publicPanes) || null, LOT = (GOOGLE_TILES && GOOGLE_TILES.lot) || null;
+  const publicFloorAt = (y) => { if (!PUB) return null; for (const f of PUB.floors) if (y >= f.y[0] && y <= f.y[1]) return f.floor; return null; };
+  const insidePodium = (x, y) => !LOT || (x >= LOT.x[0] - 0.5 && x <= LOT.x[1] + 0.5 && y >= LOT.y[0] - 0.5 && y <= LOT.y[1] + 0.5);
   const v = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()], nrm = new THREE.Vector3(), cb = new THREE.Vector3(), ab = new THREE.Vector3();
   for (const mesh of glass) {
     mesh.updateMatrixWorld(true);
@@ -2102,7 +2109,16 @@ function setupLitUnits() {
       const w = Math.hypot(max[0] - min[0], max[2] - min[2]), h = max[1] - min[1];
       if (h < 0.8 || h > 3.4 || w < 0.45 || w > 6 || area < 0.4) continue;
       const cx = (min[0] + max[0]) / 2, cy = (min[1] + max[1]) / 2, cz = (min[2] + max[2]) / 2;
-      const u = unitAtPoint(cx, -cz, cy); if (!u) continue;
+      const u = unitAtPoint(cx, -cz, cy);
+      if (!u) {
+        const fl = publicFloorAt(cy);
+        if (fl != null && insidePodium(cx, -cz) && h >= 0.8) {
+          const L0 = Math.hypot(nx, nz) || 1; let ox0 = nx / L0, oz0 = nz / L0;
+          const bc = siteCenter(); if ((cx - bc.x) * ox0 + (cz - bc.z) * oz0 < 0) { ox0 = -ox0; oz0 = -oz0; }
+          publicPanes.push({ cx, cy, cz, w, h, ox: ox0, oz: oz0, floor: fl });
+        }
+        continue;
+      }
       const b = u.box, dxEdge = b.size[0] / 2 - Math.abs(cx - b.center[0]), dyEdge = b.size[1] / 2 - Math.abs(-cz - b.center[1]);
       if (Math.min(dxEdge, dyEdge) < 0.7 && h < 1.5) continue;   // balcony railings sit on the box edge and are ~1.1 m high
       const L = Math.hypot(nx, nz) || 1; let ox = nx / L, oz = nz / L;
@@ -2120,10 +2136,66 @@ function setupLitUnits() {
     m4.compose(pos, q, sc); im.setMatrixAt(k, m4); p.u.litPanes = (p.u.litPanes || 0) + 1;
   });
   im.instanceMatrix.needsUpdate = true; im.userData.items = items; scene.add(im); litWindows = im;
+  if (publicPanes.length) {
+    const pm = new THREE.MeshBasicMaterial({ color: (PUB && PUB.color) || 0xffe0b0, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+    const pim = new THREE.InstancedMesh(geo, pm, publicPanes.length); pim.frustumCulled = false; pim.visible = false; pim.renderOrder = 1;
+    publicPanes.forEach((p, k) => { pos.set(p.cx - p.ox * LIT.inset, p.cy, p.cz - p.oz * LIT.inset); q.setFromAxisAngle(up, Math.atan2(p.ox, p.oz)); sc.set(p.w * 0.9, p.h * 0.88, 1); m4.compose(pos, q, sc); pim.setMatrixAt(k, m4); });
+    pim.instanceMatrix.needsUpdate = true; pim.userData.items = publicPanes; scene.add(pim); publicWindows = pim;
+  }
   state.litReport = { glassMeshes: glass.length, panes: panes.length, lit: items.length };
+}
+// GRANRESERVA-MAIN6: the street lamps (night.js) were built on z = 0; once the Google ground is in, each lamp, its light
+// pool and its point-light head are moved to the sampled ground height (the sidewalk undulates by +-0.5 m)
+function relevelLamps() {
+  if (!night || !tiles3d || !tiles3d.ready) return;
+  const S = night.objects; if (!S || !S.lamps || !S.lamps.length || !S.poles) return;
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), one = new THREE.Vector3(1, 1, 1), up = new THREE.Vector3(0, 1, 0);
+  S.lamps.forEach((l, i) => {
+    const h = tiles3d.hitAt(l.x, l.y); if (h == null || Math.abs(h) > 6) return;
+    q.setFromAxisAngle(up, Math.atan2(l.nx, -l.ny)); p.set(l.x, h + 0.05, -l.y); m.compose(p, q, one); S.poles.setMatrixAt(i, m); S.lenses.setMatrixAt(i, m);
+    if (l.head) l.head.y = h + 5.6 - 0.2;
+    p.set(l.head ? l.head.x : l.x, h + 0.35, l.head ? l.head.z : -l.y); q.identity(); m.compose(p, q, one); S.pools.setMatrixAt(i, m);
+  });
+  S.poles.instanceMatrix.needsUpdate = S.lenses.instanceMatrix.needsUpdate = S.pools.instanceMatrix.needsUpdate = true;
+  S.lastTarget.set(Infinity, 0, 0);   // the point lights re-attach to the lamp heads on the next update
+}
+// GRANRESERVA-MAIN6: facade uplights, hall / leisure / rooftop points and the pool glow (NIGHT_LIGHTS in config.js)
+function setupNightLights() {
+  const cfg = NIGHT_LIGHTS; if (!cfg) return;
+  nightLights = { spots: [], points: [] };
+  for (const sp of (cfg.spots || [])) {
+    const l = new THREE.SpotLight(sp.color, 0, sp.distance || 60, sp.angle || 0.4, sp.penumbra || 0.6, 2);
+    l.position.fromArray(sp.pos); l.target.position.fromArray(sp.target); l.userData.intensity = sp.intensity;
+    scene.add(l); scene.add(l.target); nightLights.spots.push(l);
+  }
+  const np = IS_TOUCH ? Math.min(3, (cfg.points || []).length) : (cfg.points || []).length;
+  for (const pt of (cfg.points || []).slice(0, np)) {
+    const l = new THREE.PointLight(pt.color, 0, pt.distance || 20, 2); l.position.fromArray(pt.pos); l.userData.intensity = pt.intensity;
+    scene.add(l); nightLights.points.push(l);
+  }
+  scene.traverse((o) => { if (o.isMesh && /GR_WATER/i.test((o.material && o.material.name) || '') && o.material.emissive) { poolMats.push(o.material); o.material.emissive.set((cfg.pool && cfg.pool.color) || 0x3fc0e6); o.material.emissiveIntensity = 0; } });
+}
+async function setupContext3D() {
+  try {
+    const [houses, towers] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null)]);
+    if (!houses && !towers) return;
+    const { createContext3D } = await import('./context3d.js?v=34');
+    context3d = createContext3D({ scene, houses, towers, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
+    if (contextGroup) contextGroup.traverse((o) => { if (o.isMesh && /^BUILDINGS_/.test(o.name || '')) o.visible = false; });   // the baked blocks give way to the sampled ones
+    if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else if (contextGroup) context3d.build([contextGroup]);
+  } catch (e) { console.warn('context3d disabled', e); }
 }
 function updateLitUnits(tt) {
   const k = Math.min(1, Math.max(0, (tt - 0.45) / 0.3));
+  if (publicWindows) { publicWindows.visible = k > 0.02; publicWindows.material.opacity = ((NIGHT_LIGHTS && NIGHT_LIGHTS.publicPanes && NIGHT_LIGHTS.publicPanes.opacity) || 0.95) * k; }
+  if (nightLights) { for (const l of nightLights.spots) l.intensity = l.userData.intensity * k; for (const l of nightLights.points) l.intensity = l.userData.intensity * k; }
+  for (const m of poolMats) m.emissiveIntensity = ((NIGHT_LIGHTS && NIGHT_LIGHTS.pool && NIGHT_LIGHTS.pool.intensity) || 0.9) * k;
+  if (context3d) context3d.setNight(k);
+  if (publicWindows && publicWindows.userData.items) {   // hidden floors: the leisure glass goes with its floor
+    const items = publicWindows.userData.items, m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), pos = new THREE.Vector3(), sc = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
+    items.forEach((p, i) => { const on = state.floor == null || p.floor <= state.floor; pos.set(p.cx - p.ox * LIT.inset, p.cy, p.cz - p.oz * LIT.inset); q.setFromAxisAngle(up, Math.atan2(p.ox, p.oz)); sc.set(on ? p.w * 0.9 : 0.001, on ? p.h * 0.88 : 0.001, 1); m4.compose(pos, q, sc); publicWindows.setMatrixAt(i, m4); });
+    publicWindows.instanceMatrix.needsUpdate = true;
+  }
   if (litWindows) { litWindows.visible = k > 0.02; litWindows.material.opacity = 0.9 * k; }
   if (neighbourWindows) { neighbourWindows.visible = k > 0.02; neighbourWindows.material.opacity = 0.85 * k; }
   for (const m of ledMats) {   // thin LED lines glow strongly; the wide central mullion only warms up (it is a lit surface, not a lamp)

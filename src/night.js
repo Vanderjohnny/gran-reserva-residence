@@ -262,6 +262,8 @@ export function createNight(ctx) {
   // inside the lot) are moved along the edge past the driveway. Same-side lamps keep >= LAMP.spacing metres.
   // ------------------------------------------------------------------------------------------------------------
   function placeLamps() {
+    // GRANRESERVA: explicit street lamps (model x, y + outward normal nx, ny) when the project has no lots to derive them from
+    if (ctx.lampPositions && ctx.lampPositions.length) return ctx.lampPositions.map((l) => ({ x: l.x, y: l.y, nx: l.nx == null ? 0 : l.nx, ny: l.ny == null ? -1 : l.ny }));
     const cands = new Map();
     for (const l of ctx.lots) {
       if (l.park || l.poly.length < 3 || l.area_m2 < 60) continue;

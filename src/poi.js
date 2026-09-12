@@ -62,12 +62,23 @@ export function createPois(ctx) {
   // --------------------------------------------------------------------------------------------------------------
   function update() {
     const W = window.innerWidth, H = window.innerHeight;
+    // places off the screen (the camera orbits close to the building, most of them are) are pinned to the border in
+    // their direction when they are near enough (ctx.edgeKm), so the neighbourhood stays readable from any view
+    const edgeKm = ctx.edgeKm || 0, wide = W > 720;
+    const L = wide ? 205 : 14, R = W - 22, T = 78, B = H - 58, cxs = (L + R) / 2, cys = (T + B) / 2;
     for (const m of markers) {
       _v.copy(m.pos).project(camera);
       const behind = _v.z > 1 || _v.z < -1;
-      const x = (_v.x + 1) / 2 * W, y = (1 - _v.y) / 2 * H;
+      let x = (_v.x + 1) / 2 * W, y = (1 - _v.y) / 2 * H;
       const off = behind || x < -60 || x > W + 60 || y < -40 || y > H + 40;
-      if (off) { if (!m.el.hidden) m.el.hidden = true; continue; }
+      const edge = off && edgeKm > 0 && m.p.dist_km <= edgeKm;
+      if (off && !edge) { if (!m.el.hidden) m.el.hidden = true; continue; }
+      if (edge) {
+        let dx = x - cxs, dy = y - cys; if (behind) { dx = -dx; dy = -dy; }
+        const s = Math.max(Math.abs(dx) / (cxs - L), Math.abs(dy) / (cys - T), 1e-6); dx /= s; dy /= s;
+        x = cxs + dx; y = cys + dy;
+      }
+      if (m.edge !== edge) { m.edge = edge; m.el.classList.toggle('edge', edge); }
       if (m.el.hidden) m.el.hidden = false;
       m.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
     }

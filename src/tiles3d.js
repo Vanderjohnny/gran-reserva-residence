@@ -38,7 +38,7 @@ export function createTiles3D({ scene, camera, renderer, cfg, georef, touch = fa
   tiles.registerPlugin(new TileCompressionPlugin());
   tiles.registerPlugin(new UpdateOnChangePlugin());
   tiles.registerPlugin(new TilesFadePlugin({ fadeDuration: 400 }));
-  tiles.errorTarget = cfg.errorTarget ?? (touch ? 40 : 24);
+  tiles.errorTarget = cfg.errorTarget ?? (touch ? 28 : 16);   // finer than the default: the houses around the lot must come in as 3D, not as texture (user review 2026-09-12)
   tiles.maxDepth = Infinity;
   tiles.displayActiveTiles = false;
   tiles.lruCache.maxBytesSize = (touch ? 220 : 480) * 1024 * 1024;
