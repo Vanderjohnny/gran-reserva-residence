@@ -15,15 +15,15 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // internal modules carry a version query so browsers never pair a new main.js with a cached old module
-import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS } from './config.js?v=42';
-import { createPanoPlayer } from './pano.js?v=42';   // GRANRESERVA-MAIN
-import { createTour } from './tour.js?v=42';   // GRANRESERVA-MAIN2
-import { api } from './api.js?v=42';
-import { createNight } from './night.js?v=42';
-import { createCars } from './cars.js?v=42';
-import { createRegionMap } from './region.js?v=42';
-import { createPois } from './poi.js?v=42';
-import { createPlanes } from './planes.js?v=42';
+import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS } from './config.js?v=43';
+import { createPanoPlayer } from './pano.js?v=43';   // GRANRESERVA-MAIN
+import { createTour } from './tour.js?v=43';   // GRANRESERVA-MAIN2
+import { api } from './api.js?v=43';
+import { createNight } from './night.js?v=43';
+import { createCars } from './cars.js?v=43';
+import { createRegionMap } from './region.js?v=43';
+import { createPois } from './poi.js?v=43';
+import { createPlanes } from './planes.js?v=43';
 
 const THREE_VERSION = '0.170.0';
 const ASSET_V = '2026-09-11a';   // bump when models/textures change so browsers do not keep stale copies
@@ -2075,7 +2075,7 @@ async function setupTiles3D() {
   const georef = state.satMeta && state.satMeta.georef;
   if (!GOOGLE_TILES.key || !georef) return;
   try {
-    const { createTiles3D } = await import('./tiles3d.js?v=42');
+    const { createTiles3D } = await import('./tiles3d.js?v=43');
     tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH && Math.min(window.innerWidth, window.innerHeight) < 820,
       onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d');
         if (context3d) { context3d.build([tiles3d.group, contextGroup]); for (const ms of [7000, 16000]) setTimeout(() => { if (context3d && tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); }, ms); }
@@ -2204,10 +2204,10 @@ function setupNightLights() {
 }
 async function setupContext3D() {
   try {
-    const [houses, towers, dem] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null), loadJson('data/dem_grid.json').catch(() => null)]);
+    const [houses, towers, dem, cityLights] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null), loadJson('data/dem_grid.json').catch(() => null), loadJson('data/city_lights.json').catch(() => null)]);
     if (!houses && !towers) return;
-    const { createContext3D } = await import('./context3d.js?v=42');
-    context3d = createContext3D({ scene, houses, towers, dem, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
+    const { createContext3D } = await import('./context3d.js?v=43');
+    context3d = createContext3D({ scene, houses, towers, dem, cityLights, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
     if (contextGroup) contextGroup.traverse((o) => { if (o.isMesh && /^BUILDINGS_/.test(o.name || '')) o.visible = false; });   // the baked blocks give way to the sampled ones
     if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else context3d.build([contextGroup]);   // no terrain yet: the DEM grid places them, the tiles refine them later
   } catch (e) { console.warn('context3d disabled', e); }

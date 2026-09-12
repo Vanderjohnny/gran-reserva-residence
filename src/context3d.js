@@ -9,7 +9,75 @@
 // box covers the point, and the work is spread over frames (a few thousand ray casts otherwise freeze the page).
 import * as THREE from 'three';
 
-export function createContext3D({ scene, houses, towers, lot, dem, onWindows, csmSetup }) {
+export function createContext3D({ scene, houses, towers, lot, dem, cityLights, onWindows, csmSetup }) {
+  // ------------------------------------------------------------------------------------------- night point lights
+  // lit windows on the tower volumes, street lights at their feet and the city-light dots exported from the satellite
+  // imagery (data/city_lights.json, tools/export_city_lights.py): point sprites with a capped pixel size, additive,
+  // faded in with the night (user review 2026-09-12: "as luzes da cidade à noite sumiram; muitas janelas acesas nas
+  // torres da orla")
+  const dotTex = (() => {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 32; const g2 = cv.getContext('2d');
+    const gr = g2.createRadialGradient(16, 16, 0, 16, 16, 16);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.75)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g2.fillStyle = gr; g2.fillRect(0, 0, 32, 32);
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })();
+  function pointsMaterial(size, minPx, maxPx) {
+    return new THREE.ShaderMaterial({
+      uniforms: { uMap: { value: dotTex }, uOpacity: { value: 0 }, uScale: { value: window.innerHeight / 2 }, uSize: { value: size }, uMin: { value: minPx }, uMax: { value: maxPx } },
+      vertexShader: `attribute vec3 aColor; varying vec3 vColor; uniform float uScale, uSize, uMin, uMax;
+        void main() { vColor = aColor; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv;
+          gl_PointSize = clamp(uSize * uScale / max(1.0, -mv.z), uMin, uMax); }`,
+      fragmentShader: `uniform sampler2D uMap; uniform float uOpacity; varying vec3 vColor;
+        void main() { vec4 t = texture2D(uMap, gl_PointCoord); if (t.a < 0.03) discard; gl_FragColor = vec4(vColor * t.rgb, t.a * uOpacity); }`,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    });
+  }
+  const LIGHTS = { windows: null, city: null, street: null };
+  let seed = 20260912;
+  const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+  const warm = (br) => { const r = rnd(); const c = r < 0.62 ? [1, 0.82, 0.55] : r < 0.85 ? [0.86, 0.9, 1] : [1, 0.62, 0.28]; return [c[0] * br, c[1] * br, c[2] * br]; };
+  function makePoints(pos, col, size, minPx, maxPx, name) {
+    if (!pos.length) return null;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('aColor', new THREE.Float32BufferAttribute(col, 3));
+    const p = new THREE.Points(geo, pointsMaterial(size, minPx, maxPx)); p.name = name; p.frustumCulled = false; p.renderOrder = 2; p.visible = false;
+    return p;
+  }
+  function buildLights(towerRecs, groundFn) {
+    for (const k of Object.keys(LIGHTS)) if (LIGHTS[k]) { scene.remove(LIGHTS[k]); LIGHTS[k].geometry.dispose(); LIGHTS[k] = null; }
+    seed = 20260912;
+    // windows: a grid on every outer wall, 3.1 m per floor, a window every 3.4 m, ~55 % of them lit
+    const wp = [], wc = [], sp = [], sc = [];
+    for (const t of towerRecs) {
+      const P = t.P, n = P.length, floors = Math.min(60, Math.floor(t.h / 3.1)); let a2 = 0;
+      for (let i = 0; i < n; i++) { const a = P[i], b = P[(i + 1) % n]; a2 += a[0] * b[1] - b[0] * a[1]; }
+      const sgn = a2 > 0 ? 1 : -1; let count = 0;
+      for (let i = 0; i < n && count < 520; i++) {
+        const a = P[i], b = P[(i + 1) % n]; const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy); if (L < 2.5) continue;
+        const nx = sgn * dy / L, ny = -sgn * dx / L, cols = Math.max(1, Math.floor(L / 3.4));
+        for (let f = 0; f < floors; f++) for (let c = 0; c < cols; c++) {
+          if (rnd() > 0.55) continue;
+          const u = (c + 0.5) / cols, x = a[0] + dx * u + nx * 0.25, y = a[1] + dy * u + ny * 0.25, z = t.base + f * 3.1 + 1.7;
+          wp.push(x, z, -y); wc.push(...warm(0.6 + rnd() * 0.6)); count++;
+        }
+      }
+      for (let k = 0; k < 2; k++) {   // street lights at the foot of the tower
+        const x = t.cx + (rnd() - 0.5) * 24, y = t.cy + (rnd() - 0.5) * 24; const g = groundFn(x, y); if (g == null) continue;
+        sp.push(x, g + 4, -y); sc.push(1.0 * 0.9, 0.78 * 0.9, 0.45 * 0.9);
+      }
+    }
+    LIGHTS.windows = makePoints(wp, wc, 9, 1.6, 5.5, 'tower-windows');
+    // city dots from the imagery
+    const cp = [], cc = [];
+    for (const [x, y, L] of ((cityLights && cityLights.lights) || [])) {
+      const g = groundFn(x, y); if (g == null) continue;
+      cp.push(x, g + 2.0, -y); cc.push(...warm(0.5 + L * 0.6));
+    }
+    LIGHTS.city = makePoints(cp.concat(sp), cc.concat(sc), 14, 2, 8, 'city-lights');
+    for (const k of Object.keys(LIGHTS)) if (LIGHTS[k]) { LIGHTS[k].material.uniforms.uOpacity.value = S.nightK || 0; LIGHTS[k].visible = (S.nightK || 0) > 0.02; scene.add(LIGHTS[k]); }
+    S.lights = { windows: wp.length / 3, city: cp.length / 3, street: sp.length / 3 };
+  }
   // last ground source: the elevation grids of data/dem_grid.json (metres east / north of the pin, heights relative
   // to the site datum), sampled bilinearly - used wherever no Google tile and no terrain mesh is loaded (far away)
   let demSample = null;
@@ -123,7 +191,7 @@ export function createContext3D({ scene, houses, towers, lot, dem, onWindows, cs
       winList.push({ c: b.c, z: [base, top], h: top - base, a: b.a, p: P });
       if ((i % chunk) === chunk - 1) { await nextFrame(); if (version !== S.version) { S.building = false; return; } }
     }
-    const tw = [], tr = [];
+    const tw = [], tr = [], towerRecs = [];
     const tl = (towers && towers.buildings) || [];
     for (let i = 0; i < tl.length; i++) {
       const b = tl[i]; const P = b.p; const [cx, cy] = b.c;
@@ -133,16 +201,20 @@ export function createContext3D({ scene, houses, towers, lot, dem, onWindows, cs
       if (!all.length) continue;
       const base = Math.min(...all) - 1.0;
       extrude(P, base, base + b.h, tw, tr);
+      towerRecs.push({ P, base, h: b.h, cx, cy });
       if ((i % chunk) === chunk - 1) { await nextFrame(); if (version !== S.version) { S.building = false; return; } }
     }
     for (const o of group.children.slice()) { group.remove(o); o.geometry.dispose(); }
     for (const m of [toMesh(walls, MAT.wall, 'houses-walls'), toMesh(roofs, MAT.roof, 'houses-roofs'), toMesh(tw, MAT.towerWall, 'towers-walls'), toMesh(tr, MAT.towerRoof, 'towers-roofs')]) if (m) group.add(m);
     S.houses = winList.length; S.towers = tl.length; S.building = false;
     if (onWindows) onWindows({ buildings: winList });
+    try { buildLights(towerRecs, ground); } catch (e) { console.warn('context3d lights', e); }
   }
   function setNight(k) {   // k 0 day .. 1 night: the blocks darken with the sky (they are lit by the scene lights too)
+    S.nightK = k;
     const c = 1 - 0.55 * k;
     MAT.wall.color.setScalar(0.81 * c); MAT.roof.color.setScalar(0.73 * c); MAT.towerWall.color.setScalar(0.87 * c); MAT.towerRoof.color.setScalar(0.77 * c);
+    for (const key of Object.keys(LIGHTS)) { const p = LIGHTS[key]; if (!p) continue; p.material.uniforms.uOpacity.value = k; p.material.uniforms.uScale.value = window.innerHeight / 2; p.visible = k > 0.02; }
   }
   return { group, build, setNight, get state() { return S; } };
 }
