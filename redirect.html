@@ -1,0 +1,10 @@
+<!doctype html>
+<!-- Leave this file as index.html on the OLD host (e.g. GitHub Pages) after the site moved to the client's domain.
+     Replace {{NEW_URL}} with the new origin (https://example.com/). Query string and #deep-link are preserved. -->
+<html lang="en"><head><meta charset="utf-8"><title>{{NAME}} has moved</title>
+<meta name="robots" content="noindex"><meta http-equiv="refresh" content="3;url={{NEW_URL}}">
+<link rel="canonical" href="{{NEW_URL}}">
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font:16px/1.5 system-ui,sans-serif;background:#0f1a24;color:#e8eef3;text-align:center}a{color:#8fd3ff}</style>
+</head><body><div><p><strong>{{NAME}}</strong> has moved.</p><p>Redirecting to <a id="l" href="{{NEW_URL}}">{{NEW_URL}}</a> …</p></div>
+<script>(function(){var u='{{NEW_URL}}'.replace(/\/$/,'/')+location.search+location.hash;document.getElementById('l').href=u;setTimeout(function(){location.replace(u)},800)})();</script>
+</body></html>

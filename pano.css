@@ -1,0 +1,48 @@
+/* 360° panorama player overlay (src/pano.js) */
+#pano { position: fixed; inset: 0; z-index: 70; background: #05080b; color: #fff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+#pano[hidden] { display: none !important; }
+.pano-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+.pano-canvas:active { cursor: grabbing; }
+.pano-hs-layer { position: absolute; inset: 0; pointer-events: none; }
+.pano-hs { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; color: #fff; cursor: pointer; padding: 6px; }
+.pano-hs .arrow { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.85); backdrop-filter: blur(4px); box-shadow: 0 4px 16px rgba(0,0,0,0.4); transition: transform 0.15s ease, background 0.15s ease; animation: pano-pulse 2.4s ease-in-out infinite; }
+.pano-hs:hover .arrow { transform: scale(1.12); background: rgba(232,150,42,0.7); }
+.pano-hs .lb { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; text-shadow: 0 1px 6px rgba(0,0,0,0.8); background: rgba(0,0,0,0.35); padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+@keyframes pano-pulse { 0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(255,255,255,0.35); } 50% { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 10px rgba(255,255,255,0); } }
+.pano-top { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 14px 16px; background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0)); pointer-events: none; }
+.pano-top > * { pointer-events: auto; }
+.pano-title { font-size: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.7); padding-top: 6px; }
+.pano-title b { font-family: var(--serif, Georgia, serif); font-weight: 500; font-size: 20px; }
+.pano-title .pano-count { color: rgba(255,255,255,0.75); font-size: 13px; }
+.pano-tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.pano-btn { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); background: rgba(10,14,18,0.55); color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; backdrop-filter: blur(6px); }
+.pano-btn .ic { font-size: 16px; line-height: 1; }
+.pano-btn.on { background: rgba(232,150,42,0.85); border-color: rgba(232,150,42,1); color: #1a1208; }
+.pano-btn[hidden] { display: none !important; }
+.pano-close { width: 38px; padding: 0; justify-content: center; font-size: 22px; }
+.pano-strip { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 12px 14px 14px; overflow-x: auto; scrollbar-width: thin; background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.6)); -webkit-overflow-scrolling: touch; }
+.pano-strip[hidden] { display: none; }
+.pano-thumb { flex: none; width: 116px; border: 2px solid transparent; border-radius: 10px; padding: 0; background: rgba(0,0,0,0.35); cursor: pointer; overflow: hidden; color: #fff; text-align: left; }
+.pano-thumb img { display: block; width: 100%; height: 58px; object-fit: cover; }
+.pano-thumb span { display: block; font-size: 11px; font-weight: 600; padding: 4px 6px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pano-thumb.on { border-color: #e8962a; }
+.pano-loading { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+.pano-loading[hidden] { display: none; }
+.pano-loading span { display: block; width: 42px; height: 42px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.25); border-top-color: #fff; animation: pano-spin 0.9s linear infinite; }
+@keyframes pano-spin { to { transform: rotate(360deg); } }
+.pano-hint { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); background: rgba(10,14,18,0.8); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; white-space: nowrap; max-width: 90vw; text-overflow: ellipsis; overflow: hidden; }
+.pano-hint.show { opacity: 1; }
+.pano-edit { position: absolute; left: 12px; bottom: 100px; font: 12px ui-monospace, Menlo, Consolas, monospace; background: rgba(255,255,255,0.9); color: #111; padding: 6px 10px; border-radius: 8px; }
+#pano.vr .pano-top, #pano.vr .pano-strip, #pano.vr .pano-hs-layer { display: none; }
+#pano.vr::after { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: rgba(0,0,0,0.9); transform: translateX(-1px); }
+#pano.vr .pano-hint { bottom: 24px; }
+#pano.vr .pano-exit { display: block; }
+#pano.vr .pano-canvas { cursor: default; }
+body.pano-open #tooltip, body.pano-open #poi-layer { display: none !important; }
+@media (max-width: 720px) {
+  .pano-btn .lb { display: none; }
+  .pano-btn { width: 38px; padding: 0; justify-content: center; }
+  .pano-title b { font-size: 17px; }
+  .pano-thumb { width: 96px; }
+  .pano-thumb img { height: 50px; }
+}

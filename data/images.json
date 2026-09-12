@@ -1,0 +1,554 @@
+{
+ "panos": [
+  {
+   "id": "academia",
+   "group": "leisure",
+   "label": {
+    "pt": "Academia",
+    "en": "Gym"
+   },
+   "file": "assets/pano/academia.jpg",
+   "low": "assets/pano/academia_2k.jpg",
+   "thumb": "assets/pano/academia_thumb.jpg",
+   "source": "ACADEMIA.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 4699,
+   "kb_2k": 384
+  },
+  {
+   "id": "ap_terraco_gourmet",
+   "group": "apartment",
+   "label": {
+    "pt": "Terraço gourmet",
+    "en": "Gourmet terrace"
+   },
+   "file": "assets/pano/ap_terraco_gourmet.jpg",
+   "low": "assets/pano/ap_terraco_gourmet_2k.jpg",
+   "thumb": "assets/pano/ap_terraco_gourmet_thumb.jpg",
+   "source": "AP TERRAÇO GOURMET.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 2331,
+   "kb_2k": 186
+  },
+  {
+   "id": "ap_terraco",
+   "group": "apartment",
+   "label": {
+    "pt": "Terraço",
+    "en": "Terrace"
+   },
+   "file": "assets/pano/ap_terraco.jpg",
+   "low": "assets/pano/ap_terraco_2k.jpg",
+   "thumb": "assets/pano/ap_terraco_thumb.jpg",
+   "source": "AP TERRAÇO.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 2223,
+   "kb_2k": 173
+  },
+  {
+   "id": "apartamento_terraco_pergolado",
+   "group": "apartment",
+   "label": {
+    "pt": "Terraço com pergolado",
+    "en": "Pergola terrace"
+   },
+   "file": "assets/pano/apartamento_terraco_pergolado.jpg",
+   "low": "assets/pano/apartamento_terraco_pergolado_2k.jpg",
+   "thumb": "assets/pano/apartamento_terraco_pergolado_thumb.jpg",
+   "source": "APartamento TERRAÇO pergolado.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 3464,
+   "kb_2k": 321
+  },
+  {
+   "id": "apartamento_living",
+   "group": "apartment",
+   "label": {
+    "pt": "Living",
+    "en": "Living room"
+   },
+   "file": "assets/pano/apartamento_living.jpg",
+   "low": "assets/pano/apartamento_living_2k.jpg",
+   "thumb": "assets/pano/apartamento_living_thumb.jpg",
+   "source": "Apartamento Living.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 3040,
+   "kb_2k": 220
+  },
+  {
+   "id": "apartamento_suite",
+   "group": "apartment",
+   "label": {
+    "pt": "Suíte",
+    "en": "Master suite"
+   },
+   "file": "assets/pano/apartamento_suite.jpg",
+   "low": "assets/pano/apartamento_suite_2k.jpg",
+   "thumb": "assets/pano/apartamento_suite_thumb.jpg",
+   "source": "Apartamento Suíte.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 3477,
+   "kb_2k": 273
+  },
+  {
+   "id": "festas",
+   "group": "leisure",
+   "label": {
+    "pt": "Salão de festas",
+    "en": "Party room"
+   },
+   "file": "assets/pano/festas.jpg",
+   "low": "assets/pano/festas_2k.jpg",
+   "thumb": "assets/pano/festas_thumb.jpg",
+   "source": "FESTAS.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 3032,
+   "kb_2k": 236
+  },
+  {
+   "id": "game_center",
+   "group": "leisure",
+   "label": {
+    "pt": "Game center",
+    "en": "Game center"
+   },
+   "file": "assets/pano/game_center.jpg",
+   "low": "assets/pano/game_center_2k.jpg",
+   "thumb": "assets/pano/game_center_thumb.jpg",
+   "source": "GAME CENTER.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 3490,
+   "kb_2k": 237
+  },
+  {
+   "id": "gourmet_fundos",
+   "group": "leisure",
+   "label": {
+    "pt": "Espaço gourmet",
+    "en": "Gourmet space"
+   },
+   "file": "assets/pano/gourmet_fundos.jpg",
+   "low": "assets/pano/gourmet_fundos_2k.jpg",
+   "thumb": "assets/pano/gourmet_fundos_thumb.jpg",
+   "source": "GOURMET FUNDOS.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 3187,
+   "kb_2k": 323
+  },
+  {
+   "id": "lazer_fundos",
+   "group": "leisure",
+   "label": {
+    "pt": "Lazer dos fundos",
+    "en": "Back leisure deck"
+   },
+   "file": "assets/pano/lazer_fundos.jpg",
+   "low": "assets/pano/lazer_fundos_2k.jpg",
+   "thumb": "assets/pano/lazer_fundos_thumb.jpg",
+   "source": "LAZER FUNDOS.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 2001,
+   "kb_2k": 186
+  },
+  {
+   "id": "lounge_rooftop",
+   "group": "leisure",
+   "label": {
+    "pt": "Lounge do rooftop",
+    "en": "Rooftop lounge"
+   },
+   "file": "assets/pano/lounge_rooftop.jpg",
+   "low": "assets/pano/lounge_rooftop_2k.jpg",
+   "thumb": "assets/pano/lounge_rooftop_thumb.jpg",
+   "source": "LOUNGE ROOFTOP.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 2782,
+   "kb_2k": 208
+  },
+  {
+   "id": "piscina_kids",
+   "group": "leisure",
+   "label": {
+    "pt": "Piscina infantil",
+    "en": "Kids pool"
+   },
+   "file": "assets/pano/piscina_kids.jpg",
+   "low": "assets/pano/piscina_kids_2k.jpg",
+   "thumb": "assets/pano/piscina_kids_thumb.jpg",
+   "source": "PISCINA Kids.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 4968,
+   "kb_2k": 414
+  },
+  {
+   "id": "piscina_prainha",
+   "group": "leisure",
+   "label": {
+    "pt": "Piscina com prainha",
+    "en": "Beach-entry pool"
+   },
+   "file": "assets/pano/piscina_prainha.jpg",
+   "low": "assets/pano/piscina_prainha_2k.jpg",
+   "thumb": "assets/pano/piscina_prainha_thumb.jpg",
+   "source": "PISCINA PRAINHA.jpg",
+   "px": [
+    6000,
+    3000
+   ],
+   "kb": 4759,
+   "kb_2k": 399
+  }
+ ],
+ "apartment": [
+  {
+   "file": "assets/img/apt_01.jpg",
+   "label": {
+    "pt": "Terraço",
+    "en": "Terrace"
+   },
+   "source": "13-TERRAÇO_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1400,
+    1400
+   ],
+   "kb": 255,
+   "room": "terrace"
+  },
+  {
+   "file": "assets/img/apt_02.jpg",
+   "label": {
+    "pt": "Terraço",
+    "en": "Terrace"
+   },
+   "source": "14-TERRAÇO_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1400,
+    1400
+   ],
+   "kb": 206,
+   "room": "terrace"
+  },
+  {
+   "file": "assets/img/apt_03.jpg",
+   "label": {
+    "pt": "Terraço",
+    "en": "Terrace"
+   },
+   "source": "15-TERRAÇO_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1400,
+    1120
+   ],
+   "kb": 164,
+   "room": "terrace"
+  },
+  {
+   "file": "assets/img/apt_04.jpg",
+   "label": {
+    "pt": "Terraço",
+    "en": "Terrace"
+   },
+   "source": "16-TERRAÇO_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1400,
+    910
+   ],
+   "kb": 161,
+   "room": "terrace"
+  },
+  {
+   "file": "assets/img/apt_05.jpg",
+   "label": {
+    "pt": "Sacada",
+    "en": "Balcony"
+   },
+   "source": "17-SACADA_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1400,
+    873
+   ],
+   "kb": 121,
+   "room": "balcony"
+  },
+  {
+   "file": "assets/img/apt_06.jpg",
+   "label": {
+    "pt": "Living",
+    "en": "Living room"
+   },
+   "source": "18-LIVING_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1400,
+    772
+   ],
+   "kb": 103,
+   "room": "living_room"
+  },
+  {
+   "file": "assets/img/apt_07.jpg",
+   "label": {
+    "pt": "Living",
+    "en": "Living room"
+   },
+   "source": "19-LIVING_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1400,
+    1045
+   ],
+   "kb": 104,
+   "room": "living_room"
+  },
+  {
+   "file": "assets/img/apt_08.jpg",
+   "label": {
+    "pt": "Suíte",
+    "en": "Master suite"
+   },
+   "source": "20-SUITE_JNC_GRAN_RESERVA_UNK_GROUP.jpeg",
+   "px": [
+    1400,
+    1045
+   ],
+   "kb": 199,
+   "room": "master_suite"
+  },
+  {
+   "file": "assets/img/apt_09.jpg",
+   "label": {
+    "pt": "Suíte",
+    "en": "Master suite"
+   },
+   "source": "21-SUITE_JNC_GRAN_RESERVA_UNK_GROUP.jpeg",
+   "px": [
+    1400,
+    1128
+   ],
+   "kb": 160,
+   "room": "master_suite"
+  },
+  {
+   "file": "assets/img/apt_10.jpg",
+   "label": {
+    "pt": "Suíte",
+    "en": "Master suite"
+   },
+   "source": "22-SUITE_JNC_GRAN_RESERVA_UNK_GROUP.jpg",
+   "px": [
+    1049,
+    1400
+   ],
+   "kb": 133,
+   "room": "master_suite"
+  },
+  {
+   "file": "assets/img/apt_11.jpg",
+   "label": {
+    "pt": "Suíte",
+    "en": "Master suite"
+   },
+   "source": "23-SUITE_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1400,
+    1400
+   ],
+   "kb": 181,
+   "room": "master_suite"
+  }
+ ],
+ "facade": [
+  {
+   "file": "assets/img/facade_1.jpg",
+   "source": "01-FACHADA_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1307,
+    1600
+   ],
+   "kb": 354
+  },
+  {
+   "file": "assets/img/facade_2.jpg",
+   "source": "02-FACHADA_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1600,
+    1007
+   ],
+   "kb": 301
+  }
+ ],
+ "plans": [
+  {
+   "id": "planta_lazer",
+   "file": "assets/plans/planta_lazer.jpg",
+   "label": {
+    "pt": "Planta do lazer · 3º pavimento",
+    "en": "Leisure floor plan · 3rd floor"
+   },
+   "source": "24-PLANTA_LAZER_3PAVIMENTO_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    998,
+    1600
+   ],
+   "kb": 196
+  },
+  {
+   "id": "planta_tipo",
+   "file": "assets/plans/planta_tipo.jpg",
+   "label": {
+    "pt": "Planta tipo · 5º ao 12º",
+    "en": "Typical floor plan · 5th to 12th"
+   },
+   "source": "25_PLANTA_TIPO_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1379,
+    1600
+   ],
+   "kb": 343
+  },
+  {
+   "id": "planta_diferenciado",
+   "file": "assets/plans/planta_diferenciado.jpg",
+   "label": {
+    "pt": "Planta do tipo diferenciado · 4º",
+    "en": "Differentiated floor plan · 4th"
+   },
+   "source": "26_PLANTA_DIFERENCIADO_JNC_GRAN_RESERVA_UNK_GROUP.png",
+   "px": [
+    1491,
+    1600
+   ],
+   "kb": 377
+  },
+  {
+   "id": "planta_rooftop",
+   "file": "assets/plans/planta_rooftop.jpg",
+   "label": {
+    "pt": "Planta do rooftop",
+    "en": "Rooftop plan"
+   },
+   "source": "27-PLANTA_LAZER_ROOFTOP_JNC_GRAN_RESERVA_UNK_GROUP--.png",
+   "px": [
+    1371,
+    1600
+   ],
+   "kb": 371
+  }
+ ],
+ "leisure_renders": [
+  {
+   "num": "03",
+   "label": {
+    "pt": "Piscina",
+    "en": "Pool"
+   },
+   "source": "03-PISCINA_JNC_GRAN_RESERVA_UNK_GROUP.jpg"
+  },
+  {
+   "num": "04",
+   "label": {
+    "pt": "Piscina",
+    "en": "Pool"
+   },
+   "source": "04-PISCINA_JNC_GRAN_RESERVA_UNK_GROUP.png"
+  },
+  {
+   "num": "05",
+   "label": {
+    "pt": "Quiosque da piscina",
+    "en": "Pool kiosk"
+   },
+   "source": "05-QUIOSQUE_PISCINA_JNC_GRAN_RESERVA_UNK_GROUP.png"
+  },
+  {
+   "num": "06",
+   "label": {
+    "pt": "Salão de festas",
+    "en": "Party room"
+   },
+   "source": "06-SALÃO_FESTAS_JNC_GRAN_RESERVA_UNK_GROUP.png"
+  },
+  {
+   "num": "07",
+   "label": {
+    "pt": "Espaço estar",
+    "en": "Lounge"
+   },
+   "source": "07-ESPAÇO_ESTAR_JNC_GRAN_RESERVA_UNK_GROUP.jpeg"
+  },
+  {
+   "num": "08",
+   "label": {
+    "pt": "Academia",
+    "en": "Gym"
+   },
+   "source": "08-ACADEMIA_JNC_GRAN_RESERVA_UNK_GROUP.png"
+  },
+  {
+   "num": "09",
+   "label": {
+    "pt": "Brinquedoteca",
+    "en": "Kids room"
+   },
+   "source": "09-BRINQUEDOTECA_JNC_GRAN_RESERVA_UNK_GROUP.jpg"
+  },
+  {
+   "num": "10",
+   "label": {
+    "pt": "Sala de jogos",
+    "en": "Game room"
+   },
+   "source": "10-SALA_DE_JOGOS_JNC_GRAN_RESERVA_UNK_GROUP.png"
+  },
+  {
+   "num": "11",
+   "label": {
+    "pt": "Pet place",
+    "en": "Pet place"
+   },
+   "source": "11-PET_PLACE_JNC_GRAN_RESERVA_UNK_GROUP.png"
+  },
+  {
+   "num": "12",
+   "label": {
+    "pt": "Playground",
+    "en": "Playground"
+   },
+   "source": "12-PLAYGROUND_JNC_GRAN_RESERVA_UNK_GROUP.jpg"
+  }
+ ]
+}
