@@ -76,7 +76,7 @@ export const BACKEND = {
 };
 
 // Opening view (three.js coordinates: x east, y up, z south), captured from the viewer on 2026-09-10
-export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
+export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
 
 export const PARCELS = ['T1'];   // towers (one chip per tower when there are several)
 // Blender lot numbers ("Terrenos NNN") that are parks: not selectable, no tooltip, filled with trees (besides the
@@ -363,7 +363,9 @@ export const GOOGLE_TILES = { key: 'AIzaSyAuDCrJLL2HnWJJdblHvHFyllce24Iym2U', gr
 // seconds without input the camera orbits slowly around it
 export const CAMERA = { maxDistance: 800, lockTarget: true, orbit: { enabled: true, idleMs: 6000, speed: 0.45 } };
 // points of interest closer than edgeKm are pinned to the screen border when they fall out of the view
-export const POI = { edgeKm: 1.6 };
+export const POI = { edgeKm: 9 };   // every place of the neighbourhood and the city is pinned (one dot per direction)
+// legend: no floor chips and no per-phase status table (user review 2026-09-12; the floors are reached from the apartment panel and the tour)
+export const LEGEND = { floors: false, byPhase: false };
 // night lighting of the building and its street (three.js frame: x east, y up, z = -model y). Street lamps stand on the
 // sidewalk in front of the lot (their light pools mark the Google ground, which is unlit); the facade gets three
 // uplights from the podium roof; warm points in the hall, the leisure floor and the rooftop lounge; the pool glows;
@@ -405,7 +407,7 @@ export const TOUR = [
   { id: 'rooftop', floor: null, pos: [26, 60, 26], target: [1, 42, -16], title: { pt: 'Rooftop', en: 'Rooftop' }, text: { pt: 'Piscina com prainha, piscina infantil e lounge com vista para o mar e para a mata.', en: 'Beach-entry pool, kids pool and a lounge overlooking the sea and the forest.' } },
   { id: 'entardecer', time: 0.64, pos: [-70, 42, 88], target: [2, 16, -14], title: { pt: 'Entardecer', en: 'Dusk' }, text: { pt: 'Ao entardecer os apartamentos se acendem. Use o controle de iluminação na legenda para escolher a hora do dia.', en: 'At dusk the apartments light up. Use the lighting slider in the legend to pick the time of day.' } },
 ];
-export const DEVELOPER = { name: 'JNC Empreendimentos', logo: 'assets/jnc.png', url: '', email: 'comercial@jncempreendimentos.com.br', whatsapp: '' };
+export const DEVELOPER = { name: 'JNC Empreendimentos', logo: 'assets/jnc.png', url: 'https://www.jncempreendimentos.com.br/', email: 'comercial@jncempreendimentos.com.br', whatsapp: '' };
 export const APARTMENT_FLOORS = { 3: '4º', 4: '5º', 5: '6º', 6: '7º', 7: '8º', 8: '9º', 9: '10º', 10: '11º', 11: '12º' };   // FLOOR_NN -> storey name
 export const FLOOR_LABELS = { 0: { pt: 'Térreo', en: 'Ground' }, 1: { pt: 'Garagem', en: 'Parking' }, 2: { pt: 'Lazer', en: 'Leisure' }, 3: { pt: '4º · terraços', en: '4th · terraces' }, 12: { pt: 'Rooftop', en: 'Rooftop' } };
 Object.assign(I18N.en, {

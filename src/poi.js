@@ -66,6 +66,7 @@ export function createPois(ctx) {
     // their direction when they are near enough (ctx.edgeKm), so the neighbourhood stays readable from any view
     const edgeKm = ctx.edgeKm || 0, wide = W > 720;
     const L = wide ? 205 : 14, R = W - 22, T = 78, B = H - 58, cxs = (L + R) / 2, cys = (T + B) / 2;
+    const bins = new Map();   // border direction (10 deg bins) -> nearest pinned place: one dot per direction, never a pile-up
     for (const m of markers) {
       _v.copy(m.pos).project(camera);
       const behind = _v.z > 1 || _v.z < -1;
@@ -75,6 +76,11 @@ export function createPois(ctx) {
       if (off && !edge) { if (!m.el.hidden) m.el.hidden = true; continue; }
       if (edge) {
         let dx = x - cxs, dy = y - cys; if (behind) { dx = -dx; dy = -dy; }
+        const bin = Math.round(Math.atan2(dy, dx) / (Math.PI / 18));
+        const best = bins.get(bin);
+        if (best && best.p.dist_km <= m.p.dist_km) { if (!m.el.hidden) m.el.hidden = true; continue; }
+        if (best) best.el.hidden = true;
+        bins.set(bin, m);
         const s = Math.max(Math.abs(dx) / (cxs - L), Math.abs(dy) / (cys - T), 1e-6); dx /= s; dy /= s;
         x = cxs + dx; y = cys + dy;
       }

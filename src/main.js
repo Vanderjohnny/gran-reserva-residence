@@ -15,15 +15,15 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // internal modules carry a version query so browsers never pair a new main.js with a cached old module
-import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI } from './config.js?v=34';
-import { createPanoPlayer } from './pano.js?v=34';   // GRANRESERVA-MAIN
-import { createTour } from './tour.js?v=34';   // GRANRESERVA-MAIN2
-import { api } from './api.js?v=34';
-import { createNight } from './night.js?v=34';
-import { createCars } from './cars.js?v=34';
-import { createRegionMap } from './region.js?v=34';
-import { createPois } from './poi.js?v=34';
-import { createPlanes } from './planes.js?v=34';
+import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND } from './config.js?v=35';
+import { createPanoPlayer } from './pano.js?v=35';   // GRANRESERVA-MAIN
+import { createTour } from './tour.js?v=35';   // GRANRESERVA-MAIN2
+import { api } from './api.js?v=35';
+import { createNight } from './night.js?v=35';
+import { createCars } from './cars.js?v=35';
+import { createRegionMap } from './region.js?v=35';
+import { createPois } from './poi.js?v=35';
+import { createPlanes } from './planes.js?v=35';
 
 const THREE_VERSION = '0.170.0';
 const ASSET_V = '2026-09-11a';   // bump when models/textures change so browsers do not keep stale copies
@@ -1627,7 +1627,7 @@ function buildLegend() {
   const perPhase = {};
   state.units.forEach((h) => { const st = statusOf(h); perStatus[st]++; (perPhase[h.parcel] = perPhase[h.parcel] || { available: 0, reserved: 0, sold: 0 })[st]++; });
   $('status-items').innerHTML = Object.entries(STATUS).map(([k, s]) => `<button class="schip ${state.activeStatuses.has(k) ? '' : 'off'}" data-status="${k}" title="${t('statusHint')}"><span class="dot" style="background:${s.hex}"></span>${s.label[state.lang]} <b>${perStatus[k]}</b></button>`).join('')
-    + `<button class="schip toggle ${state.byPhase ? 'on' : ''}" id="status-by-phase-btn">${t('byPhase')} ${state.byPhase ? '▴' : '▾'}</button>`;
+    + ((LEGEND && LEGEND.byPhase === false) ? '' : `<button class="schip toggle ${state.byPhase ? 'on' : ''}" id="status-by-phase-btn">${t('byPhase')} ${state.byPhase ? '▴' : '▾'}</button>`);   // GRANRESERVA-MAIN7
   $('status-items').querySelectorAll('.schip[data-status]').forEach((b) => {
     b.onclick = (ev) => {
       const k = b.dataset.status;
@@ -1638,14 +1638,14 @@ function buildLegend() {
       applyFilter(); buildLegend();
     };
   });
-  $('status-by-phase-btn').onclick = () => { state.byPhase = !state.byPhase; buildLegend(); };
+  if ($('status-by-phase-btn')) $('status-by-phase-btn').onclick = () => { state.byPhase = !state.byPhase; buildLegend(); };
   const tbl = $('status-by-phase');
   tbl.hidden = !state.byPhase;
   tbl.innerHTML = state.byPhase ? `<div class="sbp-row head"><span>${t('parcel')}</span>${Object.values(STATUS).map((st) => `<span><span class="dot" style="background:${st.hex}"></span></span>`).join('')}</div>`
     + PARCELS.filter((k) => perPhase[k]).map((k) => `<div class="sbp-row ${state.activeParcels.has(k) ? '' : 'off'}"><span><b>${k}</b></span><span>${perPhase[k].available}</span><span>${perPhase[k].reserved}</span><span>${perPhase[k].sold}</span></div>`).join('') : '';
   // vertical projects: floor chips (the floors above the chosen one are ghosted / hidden / lifted)
   const fl = $('floor-items'), ft = $('legend-floors-title');
-  if (state.floors.length) {
+  if (state.floors.length && !(LEGEND && LEGEND.floors === false)) {
     ft.hidden = fl.hidden = false;
     fl.innerHTML = `<button class="pchip ${state.floor == null ? '' : 'off'}" data-floor="all">${t('allFloors')}</button>` + state.floors.map((f) => `<button class="pchip ${state.floor === f.n ? '' : 'off'}" data-floor="${f.n}">${floorName(f.n)}</button>`).join('');
     fl.querySelectorAll('.pchip').forEach((b) => { b.onclick = () => { state.floor = b.dataset.floor === 'all' ? null : +b.dataset.floor; applyFloorReveal(); if (night) updateLitUnits(night.t); if (state.selected && !isVisibleHouse(state.selected)) clearSelection(); applyFilter(); buildLegend(); }; });
@@ -2048,7 +2048,7 @@ async function setupTiles3D() {
   const georef = state.satMeta && state.satMeta.georef;
   if (!GOOGLE_TILES.key || !georef) return;
   try {
-    const { createTiles3D } = await import('./tiles3d.js?v=34');
+    const { createTiles3D } = await import('./tiles3d.js?v=35');
     tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH && Math.min(window.innerWidth, window.innerHeight) < 820,
       onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d');
         if (context3d) { context3d.build([tiles3d.group, contextGroup]); for (const ms of [7000, 16000]) setTimeout(() => { if (context3d && tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); }, ms); }
@@ -2179,7 +2179,7 @@ async function setupContext3D() {
   try {
     const [houses, towers] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null)]);
     if (!houses && !towers) return;
-    const { createContext3D } = await import('./context3d.js?v=34');
+    const { createContext3D } = await import('./context3d.js?v=35');
     context3d = createContext3D({ scene, houses, towers, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
     if (contextGroup) contextGroup.traverse((o) => { if (o.isMesh && /^BUILDINGS_/.test(o.name || '')) o.visible = false; });   // the baked blocks give way to the sampled ones
     if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else if (contextGroup) context3d.build([contextGroup]);
@@ -2364,6 +2364,13 @@ window.addEventListener('resize', () => {
   if (pois) pois.resize();
 });
 
+// GRANRESERVA-MAIN7: the developer's logo opens its website
+(() => {
+  const url = DEVELOPER && DEVELOPER.url; const img = document.querySelector('.dev-card .dev-logo');
+  if (!url || !img || img.closest('a')) return;
+  const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.title = DEVELOPER.name || '';
+  img.replaceWith(a); a.appendChild(img);
+})();
 window.__app = { BUILDING, get litReport() { return state.litReport; }, get tour() { return tour; }, startIntro: () => { prepareIntro(); startIntro(); }, get pano() { return pano; }, get tiles3d() { return tiles3d; }, openPano, capture: () => ({ position: [...camera.position].map((v) => +v.toFixed(2)), target: [...controls.target].map((v) => +v.toFixed(2)) }), applyFloorReveal: () => applyFloorReveal(), setLod: (d) => { LOD_DIST = d; rebuildInstances(true); return LOD_DIST; }, get lodDist() { return LOD_DIST; }, models, scene, camera, renderer, controls, state, unitAt, unitOfHouseAt, houseGroups, proxies, modelInfo, select, flyTo, setOverview, SUN_DIR, MATS, setNight, setTime: (tt) => night && night.setTime(tt), openRegionMap, get night() { return night; }, get cars() { return cars; }, get regionMap() { return regionMap; }, get pois() { return pois; }, get planes() { return planes; }, get csm() { return csm; }, get composer() { return composer; }, get gtao() { return gtao; } };
 
 init().catch((err) => {
