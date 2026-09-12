@@ -9,7 +9,24 @@
 // box covers the point, and the work is spread over frames (a few thousand ray casts otherwise freeze the page).
 import * as THREE from 'three';
 
-export function createContext3D({ scene, houses, towers, lot, onWindows, csmSetup }) {
+export function createContext3D({ scene, houses, towers, lot, dem, onWindows, csmSetup }) {
+  // last ground source: the elevation grids of data/dem_grid.json (metres east / north of the pin, heights relative
+  // to the site datum), sampled bilinearly - used wherever no Google tile and no terrain mesh is loaded (far away)
+  let demSample = null;
+  if (dem && dem.grids && dem.grids.length) {
+    const th = (dem.north_deg || 0) * Math.PI / 180, c = Math.cos(th), s = Math.sin(th), [ax, ay] = dem.anchor_model || [0, 0];
+    const grids = dem.grids.slice().sort((a, b) => a.step - b.step);   // finest first
+    demSample = (x, y) => {
+      const e = c * (x - ax) + s * (y - ay), n = -s * (x - ax) + c * (y - ay);
+      for (const g of grids) {
+        const fi = (e - g.east0) / g.step, fj = (n - g.north0) / g.step, N = g.n;
+        if (fi < 0 || fj < 0 || fi > N - 1 || fj > N - 1) continue;
+        const i0 = Math.floor(fi), j0 = Math.floor(fj), i1 = Math.min(i0 + 1, N - 1), j1 = Math.min(j0 + 1, N - 1), u = fi - i0, v = fj - j0, H = g.h;
+        return (H[j0 * N + i0] * (1 - u) + H[j0 * N + i1] * u) * (1 - v) + (H[j1 * N + i0] * (1 - u) + H[j1 * N + i1] * u) * v;
+      }
+      return null;
+    };
+  }
   const MAT = {
     wall: new THREE.MeshStandardMaterial({ color: 0xcfccc6, roughness: 0.9, metalness: 0.0 }),
     roof: new THREE.MeshStandardMaterial({ color: 0xb9b6b0, roughness: 0.95, metalness: 0.0 }),
@@ -53,7 +70,7 @@ export function createContext3D({ scene, houses, towers, lot, onWindows, csmSetu
       const hit = ray.intersectObjects(cand, false)[0];
       if (hit && Math.abs(hit.point.y) < 400) return hit.point.y;
     }
-    return null;
+    return demSample ? demSample(x, y) : null;
   }
 
   // ------------------------------------------------------------------------------------------- extrusion

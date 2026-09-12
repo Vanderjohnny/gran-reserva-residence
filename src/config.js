@@ -76,7 +76,7 @@ export const BACKEND = {
 };
 
 // Opening view (three.js coordinates: x east, y up, z south), captured from the viewer on 2026-09-10
-export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
+export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
 
 export const PARCELS = ['T1'];   // towers (one chip per tower when there are several)
 // Blender lot numbers ("Terrenos NNN") that are parks: not selectable, no tooltip, filled with trees (besides the
@@ -357,13 +357,14 @@ export const PANO_MARKERS = [
 // the sidewalk line in front of the lot (three probes 1 m outside the lot front + the kerb line)
 export const GOOGLE_TILES = { key: 'AIzaSyAuDCrJLL2HnWJJdblHvHFyllce24Iym2U', groundHeight: null, autoLevel: true, errorTarget: null,
   lot: { x: [-10.4, 13.6], y: [3.6, 28.6] }, lotMargin: 0.35, clipLot: true, skirt: true, skirtBottom: -8,
-  look: { gain: 1.45, saturation: 1.6, gamma: 0.88 }, nightTintMin: 0.42 };   // look: the photogrammetry lifted / saturated to sit with the building (user review); Maps Platform API Key (projeto GRAN RESERVA 3D), restrita aos referrers localhost:5174 / unkviewer.com / github.io e as APIs Maps
+  look: { gain: 1.45, saturation: 1.6, gamma: 0.88 }, nightTintMin: 0.42,
+  tilesOnly: true, loadTimeoutMs: 30000 };   // tilesOnly: the old map (satellite + DEM) is never loaded unless the tiles fail; the loading screen waits for the tiles   // look: the photogrammetry lifted / saturated to sit with the building (user review); Maps Platform API Key (projeto GRAN RESERVA 3D), restrita aos referrers localhost:5174 / unkviewer.com / github.io e as APIs Maps
 // camera: the orbit distance is capped (the surroundings are the neighbourhood, not the region - the regional map
 // covers the far places), the target stays on the building (no panning, zoom towards the target) and after a few
 // seconds without input the camera orbits slowly around it
 export const CAMERA = { maxDistance: 800, lockTarget: true, orbit: { enabled: true, idleMs: 6000, speed: 0.45 } };
 // points of interest closer than edgeKm are pinned to the screen border when they fall out of the view
-export const POI = { edgeKm: 9 };   // every place of the neighbourhood and the city is pinned (one dot per direction)
+export const POI = { edgeKm: 9, nearHide: 260 };   // nearHide: no dots when the camera is closer than 260 m to the building   // every place of the neighbourhood and the city is pinned (one dot per direction)
 // legend: no floor chips and no per-phase status table (user review 2026-09-12; the floors are reached from the apartment panel and the tour)
 export const LEGEND = { floors: false, byPhase: false };
 // night lighting of the building and its street (three.js frame: x east, y up, z = -model y). Street lamps stand on the

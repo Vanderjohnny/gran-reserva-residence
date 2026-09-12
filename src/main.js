@@ -15,15 +15,15 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // internal modules carry a version query so browsers never pair a new main.js with a cached old module
-import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND } from './config.js?v=35';
-import { createPanoPlayer } from './pano.js?v=35';   // GRANRESERVA-MAIN
-import { createTour } from './tour.js?v=35';   // GRANRESERVA-MAIN2
-import { api } from './api.js?v=35';
-import { createNight } from './night.js?v=35';
-import { createCars } from './cars.js?v=35';
-import { createRegionMap } from './region.js?v=35';
-import { createPois } from './poi.js?v=35';
-import { createPlanes } from './planes.js?v=35';
+import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND } from './config.js?v=37';
+import { createPanoPlayer } from './pano.js?v=37';   // GRANRESERVA-MAIN
+import { createTour } from './tour.js?v=37';   // GRANRESERVA-MAIN2
+import { api } from './api.js?v=37';
+import { createNight } from './night.js?v=37';
+import { createCars } from './cars.js?v=37';
+import { createRegionMap } from './region.js?v=37';
+import { createPois } from './poi.js?v=37';
+import { createPlanes } from './planes.js?v=37';
 
 const THREE_VERSION = '0.170.0';
 const ASSET_V = '2026-09-11a';   // bump when models/textures change so browsers do not keep stale copies
@@ -244,6 +244,10 @@ worldGround.rotation.x = -Math.PI / 2;
 worldGround.position.y = -1.5;
 worldGround.renderOrder = -10;
 scene.add(worldGround);
+// GRANRESERVA-MAIN8: with Google 3D Tiles configured nothing of the old map is loaded (satellite planes, DEM terrain,
+// sea plane); the fallback only comes in when the tiles fail
+const TILES_ONLY = !!(GOOGLE_TILES && GOOGLE_TILES.key && GOOGLE_TILES.tilesOnly !== false);
+if (TILES_ONLY) worldGround.visible = false;
 const pickPlane = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), new THREE.MeshBasicMaterial({ visible: false }));
 pickPlane.rotation.x = -Math.PI / 2;
 scene.add(pickPlane);
@@ -301,9 +305,9 @@ async function init() {
 
   // the single-file build ships the six houses merged in one GLB (one scene per body) so their textures are shared
   const mergedHouses = !state.isBuilding && embedded('assets/models/houses.glb');
-  const loads = [setupEnvironment(), setupSatellite(), loadGLB('assets/models/ground.glb').catch((e) => { if (!state.isBuilding) throw e; return null; })];
+  const loads = [setupEnvironment(), TILES_ONLY ? loadSatMeta() : setupSatellite(), loadGLB('assets/models/ground.glb').catch((e) => { if (!state.isBuilding) throw e; return null; })];
   if (state.isBuilding) loads.push(loadGLB('assets/models/building.glb'));
-  if (state.isBuilding && data.context) loads.push(loadGLB('assets/models/context.glb').catch((e) => { console.warn('context.glb missing', e); return null; }));
+  if (state.isBuilding && data.context) loads.push(TILES_ONLY ? Promise.resolve(null) : loadGLB('assets/models/context.glb').catch((e) => { console.warn('context.glb missing', e); return null; }));
   else loads.push(...(mergedHouses ? [loadGLB('assets/models/houses.glb')] : [1, 2, 3, 4, 5, 6].map((i) => loadGLB(`assets/models/house_${i}.glb`))));
   const [, , ground, ...modelGltfs] = await Promise.all(loads);
   setupShadows();
@@ -336,12 +340,13 @@ async function init() {
   if (INTRO && INTRO.enabled && !location.hash && !matchMedia('(prefers-reduced-motion: reduce)').matches) prepareIntro(); else setOverview(true);
   // compile the night-only shaders now (asynchronously) so the first Day/Night toggle does not stall
   try { night.setTime(1); await renderer.compileAsync(scene, camera); night.setTime(0); await renderer.compileAsync(scene, camera); } catch (e) { night.setTime(0); }
-  pois = createPois({ scene, camera, layer: $('poi-layer'), card: $('poi-card'), tooltip, doc: state.poiDoc, t, lang: () => state.lang, siteCentre: siteCenter(), flyTo, edgeKm: (POI && POI.edgeKm) || 0, openMap: (p) => openRegionMap(p), onSelect: (p) => { if (regionMap) regionMap.selectPoi(p, false, true); } });
+  pois = createPois({ scene, camera, layer: $('poi-layer'), card: $('poi-card'), tooltip, doc: state.poiDoc, t, lang: () => state.lang, siteCentre: siteCenter(), flyTo, edgeKm: (POI && POI.edgeKm) || 0, nearHide: (POI && POI.nearHide) || 0, openMap: (p) => openRegionMap(p), onSelect: (p) => { if (regionMap) regionMap.selectPoi(p, false, true); } });
+  animate();
+  if (TILES_ONLY) await waitForTiles((GOOGLE_TILES && GOOGLE_TILES.loadTimeoutMs) || 30000);
   loadingEl.classList.add('done');
   setTimeout(() => loadingEl.remove(), 900);
   if (introPending) startIntro();
   handleHash();
-  animate();
   if (api.hasBackend()) setInterval(refreshStatuses, Math.max(15, BACKEND.pollSeconds) * 1000);
 }
 async function refreshStatuses() {
@@ -591,6 +596,7 @@ function texturedMaterial({ diff, nor, rough, color = 0xffffff, roughness = 1, n
 }
 const satMeshes = [];
 const satTex = {};   // level -> texture (reused by the context terrain)
+async function loadSatMeta() { try { state.satMeta = await loadJson('assets/map/sat_meta.json'); } catch (e) { console.warn('sat_meta.json missing', e); } }
 async function setupSatellite() {
   let meta;
   try { meta = await loadJson('assets/map/sat_meta.json'); } catch { return; }
@@ -1922,6 +1928,25 @@ function onTime(tt) {
   if (sl && document.activeElement !== sl) sl.value = Math.round(tt * 1000);
   $('time-label').textContent = tt < 0.3 ? t('day') : tt < 0.72 ? t('dusk') : t('night');
 }
+// GRANRESERVA-MAIN8: resolves when the Google tiles are levelled (or failed), or after `ms`
+function waitForTiles(ms) {
+  const t0 = performance.now();
+  return new Promise((res) => {
+    const tick = () => {
+      const t = tiles3d;
+      if ((t && (t.ready || t.failed)) || (!t && performance.now() - t0 > 6000) || performance.now() - t0 > ms) res(); else setTimeout(tick, 200);
+    };
+    tick();
+  });
+}
+async function loadFallbackContext() {   // the tiles failed: bring the old map in after all
+  worldGround.visible = true;
+  try {
+    await setupSatellite();
+    if (state.data && state.data.context) { const g = await loadGLB('assets/models/context.glb'); setupContext(g.scene); }
+    if (context3d && contextGroup) context3d.build([contextGroup]);
+  } catch (e) { console.warn('fallback context', e); }
+}
 async function openRegionMap(poi = null) {
   $('map-modal').hidden = false;
   if (!regionMap) {
@@ -2048,13 +2073,13 @@ async function setupTiles3D() {
   const georef = state.satMeta && state.satMeta.georef;
   if (!GOOGLE_TILES.key || !georef) return;
   try {
-    const { createTiles3D } = await import('./tiles3d.js?v=35');
+    const { createTiles3D } = await import('./tiles3d.js?v=37');
     tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH && Math.min(window.innerWidth, window.innerHeight) < 820,
       onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d');
         if (context3d) { context3d.build([tiles3d.group, contextGroup]); for (const ms of [7000, 16000]) setTimeout(() => { if (context3d && tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); }, ms); }
         relevelLamps(); setTimeout(relevelLamps, 9000); },
       onSkirt: (mesh) => { setupShaded(mesh.material); },
-      onFail: () => { tiles3d = null; },
+      onFail: () => { tiles3d = null; if (TILES_ONLY) loadFallbackContext(); },
       onAttribution: (txt) => { const el = $('credits-google'); if (el) el.textContent = txt ? ` · 3D: Google, ${txt}` : ''; } });
   } catch (e) { console.warn('3D tiles disabled', e); tiles3d = null; }
 }
@@ -2177,12 +2202,12 @@ function setupNightLights() {
 }
 async function setupContext3D() {
   try {
-    const [houses, towers] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null)]);
+    const [houses, towers, dem] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null), loadJson('data/dem_grid.json').catch(() => null)]);
     if (!houses && !towers) return;
-    const { createContext3D } = await import('./context3d.js?v=35');
-    context3d = createContext3D({ scene, houses, towers, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
+    const { createContext3D } = await import('./context3d.js?v=37');
+    context3d = createContext3D({ scene, houses, towers, dem, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
     if (contextGroup) contextGroup.traverse((o) => { if (o.isMesh && /^BUILDINGS_/.test(o.name || '')) o.visible = false; });   // the baked blocks give way to the sampled ones
-    if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else if (contextGroup) context3d.build([contextGroup]);
+    if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else context3d.build([contextGroup]);   // no terrain yet: the DEM grid places them, the tiles refine them later
   } catch (e) { console.warn('context3d disabled', e); }
 }
 function updateLitUnits(tt) {

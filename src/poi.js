@@ -24,6 +24,9 @@ export const POI_CAT = {
   fuel:        { icon: '⛽', hex: '#4a5568' },
   bank:        { icon: '🏦', hex: '#2c5282' },
   bus:         { icon: '🚌', hex: '#3182ce' },
+  events:      { icon: '🎉', hex: '#b83280' },
+  shop:        { icon: '🛍', hex: '#0e7490' },
+  office:      { icon: '🏢', hex: '#1e3a8a', big: true },
 };
 
 export function createPois(ctx) {
@@ -60,8 +63,13 @@ export function createPois(ctx) {
   refreshLabels();
 
   // --------------------------------------------------------------------------------------------------------------
+  let allHidden = false;
   function update() {
     const W = window.innerWidth, H = window.innerHeight;
+    // close to the building the dots only clutter the facade (user review 2026-09-12): hidden below ctx.nearHide metres
+    const near = ctx.nearHide > 0 && ctx.siteCentre && camera.position.distanceTo(ctx.siteCentre) < ctx.nearHide;
+    if (near) { if (!allHidden) { for (const m of markers) m.el.hidden = true; allHidden = true; } return; }
+    allHidden = false;
     // places off the screen (the camera orbits close to the building, most of them are) are pinned to the border in
     // their direction when they are near enough (ctx.edgeKm), so the neighbourhood stays readable from any view
     const edgeKm = ctx.edgeKm || 0, wide = W > 720;

@@ -32,13 +32,22 @@ h1, h2, h3, p { margin: 0; }
 /* text loader under the logotype (cssloaders.github.io, 'text'): one word every 1.2 s, five equal steps so
    the last word is shown as long as the others; the site font instead of Arial */
 .loader { display: inline-block; font-family: 'Montserrat', var(--font); font-weight: 500; font-size: clamp(24px, 5vw, 44px); letter-spacing: 2px; line-height: 1.2; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.6); box-sizing: border-box; min-height: 1.2em; }
-.loader::before { content: 'Loading...'; animation: animloader 6s steps(1) infinite; }
+/* Gran Reserva (user text, 2026-09-12): "CARREGANDO.. SEU... NOVO... LAR... AGUARDE...."; English when the page is in EN */
+.loader::before { content: 'CARREGANDO...'; animation: animloader 7.5s steps(1) infinite; }
 @keyframes animloader {
-  0% { content: 'Loading...'; }
-  20% { content: 'Your...'; }
-  40% { content: 'New...'; }
-  60% { content: 'Home...'; }
-  80% { content: 'Wait...'; }
+  0% { content: 'CARREGANDO...'; }
+  20% { content: 'SEU...'; }
+  40% { content: 'NOVO...'; }
+  60% { content: 'LAR...'; }
+  80% { content: 'AGUARDE...'; }
+}
+html[lang^="en"] .loader::before { content: 'LOADING...'; animation-name: animloaderEn; }
+@keyframes animloaderEn {
+  0% { content: 'LOADING...'; }
+  20% { content: 'YOUR...'; }
+  40% { content: 'NEW...'; }
+  60% { content: 'HOME...'; }
+  80% { content: 'PLEASE WAIT...'; }
 }
 /* logotype (assets/logo.png: black ink on transparent, inverted at night) */
 .brand-logo { display: block; width: 168px; height: auto; user-select: none; -webkit-user-drag: none; }
