@@ -70,13 +70,13 @@ export function imageFor(kind, color) {
 // Commercial backend (Google Apps Script web app, see tools/backend/README.md). Leave empty to run in read-only mode:
 // statuses come from data/status.json and the sales actions fall back to e-mail links.
 export const BACKEND = {
-  url: 'https://script.google.com/macros/s/AKfycbwLp0LH6krv-cbGEUkekxaCCqY2TbcII6E_cC-kDgqkvWyaykaeY664q7qxCP3c8mkG5Q/exec', tools/backend (README): empty = read-only statuses from data/status.json
+  url: 'https://script.google.com/macros/s/AKfycbwLp0LH6krv-cbGEUkekxaCCqY2TbcII6E_cC-kDgqkvWyaykaeY664q7qxCP3c8mkG5Q/exec',   // set after deploying tools/backend (README): empty = read-only statuses from data/status.json
   salesEmail: "comercial@jncempreendimentos.com.br",             // recipient of the "I'm interested" leads (also used by the mailto fallback)
   pollSeconds: 45,                           // how often visitors refresh the property statuses
 };
 
 // Opening view (three.js coordinates: x east, y up, z south), captured from the viewer on 2026-09-10
-export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
+export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
 
 export const PARCELS = ['T1'];   // towers (one chip per tower when there are several)
 // Blender lot numbers ("Terrenos NNN") that are parks: not selectable, no tooltip, filled with trees (besides the
