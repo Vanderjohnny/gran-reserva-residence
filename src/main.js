@@ -15,15 +15,15 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // internal modules carry a version query so browsers never pair a new main.js with a cached old module
-import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND } from './config.js?v=37';
-import { createPanoPlayer } from './pano.js?v=37';   // GRANRESERVA-MAIN
-import { createTour } from './tour.js?v=37';   // GRANRESERVA-MAIN2
-import { api } from './api.js?v=37';
-import { createNight } from './night.js?v=37';
-import { createCars } from './cars.js?v=37';
-import { createRegionMap } from './region.js?v=37';
-import { createPois } from './poi.js?v=37';
-import { createPlanes } from './planes.js?v=37';
+import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS } from './config.js?v=39';
+import { createPanoPlayer } from './pano.js?v=39';   // GRANRESERVA-MAIN
+import { createTour } from './tour.js?v=39';   // GRANRESERVA-MAIN2
+import { api } from './api.js?v=39';
+import { createNight } from './night.js?v=39';
+import { createCars } from './cars.js?v=39';
+import { createRegionMap } from './region.js?v=39';
+import { createPois } from './poi.js?v=39';
+import { createPlanes } from './planes.js?v=39';
 
 const THREE_VERSION = '0.170.0';
 const ASSET_V = '2026-09-11a';   // bump when models/textures change so browsers do not keep stale copies
@@ -324,7 +324,7 @@ async function init() {
     }
   } else modelGltfs.forEach((g, idx) => setupHouseModel(idx + 1, g.scene, data.models[idx + 1]));
   if (data.species && data.species.length) await buildTrees(data);
-  night = createNight({ scene, renderer, camera, controls, getCsm: () => csm, hemi, treeGroup, worldGround, satMeshes, HORIZON, pmrem, isTouch: IS_TOUCH, lots: state.lots, lotByHouse: state.lotByHouse, pavedClass, models, rebuildInstances, sunDir: SUN_DIR, onTime, lampPositions: (NIGHT_LIGHTS && NIGHT_LIGHTS.lamps) || [], siteBounds: state.data.bounds, airport: state.airport, runway: runwayCentreline(state.airport), glassMats });
+  night = createNight({ scene, renderer, camera, controls, getCsm: () => csm, hemi, treeGroup, worldGround, satMeshes, HORIZON, pmrem, isTouch: IS_TOUCH, lots: state.lots, lotByHouse: state.lotByHouse, pavedClass, models, rebuildInstances, sunDir: SUN_DIR, onTime, lampPositions: (NIGHT_LIGHTS && NIGHT_LIGHTS.lamps) || [], glassOpacity: GLASS ? { day: GLASS.opacity, night: Math.min(0.6, GLASS.opacity + 0.15) } : null, siteBounds: state.data.bounds, airport: state.airport, runway: runwayCentreline(state.airport), glassMats });
   night.build();
   cars = createCars({ scene, loadGLB, pavedClass, pavedGrid: paved, debug: /carsdebug/.test(location.search), paintGeometries: groundMeshes.filter((o) => (Array.isArray(o.material) ? o.material[0] : o.material) === MATS.paint).map((o) => o.geometry), isTouch: IS_TOUCH });
   state.carReport = await cars.build();
@@ -450,7 +450,7 @@ function setupBuilding(gltf) {
     if (!o.isMesh) return;
     o.castShadow = true; o.receiveShadow = true;
     for (const m of (Array.isArray(o.material) ? o.material : [o.material])) {
-      if (/GR_GLASS/i.test(m.name || '')) { m.transparent = true; m.opacity = 0.42; m.roughness = 0.06; m.metalness = 0.25; m.color.set(0x9fb6c6); m.envMapIntensity = 1.6; glassMats.push(m); }
+      if (/GR_GLASS/i.test(m.name || '')) { const G = GLASS || {}; m.transparent = true; m.opacity = G.opacity ?? 0.42; m.roughness = G.roughness ?? 0.06; m.metalness = G.metalness ?? 0.25; m.color.set(G.color ?? 0x9fb6c6); m.envMapIntensity = G.envMapIntensity ?? 1.6; if (G.specularIntensity != null && 'specularIntensity' in m) m.specularIntensity = G.specularIntensity; glassMats.push(m); }   // GRANRESERVA-MAIN9
       if (/GR_WATER/i.test(m.name || '')) { m.transparent = true; m.opacity = 0.85; m.roughness = 0.04; m.metalness = 0.1; m.color.set(0x3f9bb5); }
       if (/GR_TILE90/i.test(m.name || '')) { m.map = tileTexture(); m.color.set(0xffffff); m.roughness = 0.5; boxUV(o.geometry, 0.9, false, 'uv'); }   // terrace floors: 90 x 90 ceramic tiles
       if (/\bLED\d?\b|Luz LED|LED POOL|LED_STRIP/i.test(m.name || '') && m.emissive) { ledMats.push(m); m.userData.dayColor = m.color.clone(); m.emissive.set(0xffc27a); m.emissiveIntensity = 0; m.toneMapped = false; }
@@ -1703,10 +1703,12 @@ function renderPanel(h) {
   if (twin) $('panel-twin').onclick = (ev) => { ev.preventDefault(); select(twin, false); };
   if (h.kind === 'apartment') attachPanoSection(h, ty);
   $('panel-body').querySelectorAll('.swatch-btn').forEach((b) => { b.onclick = () => setHouseColour(h, b.dataset.color); });
-  const plan = prop.plan || state.registry?.plans?.[h.type]?.file || ty.plan;
+  // GRANRESERVA-MAIN9: the plan of this unit's final (01-04) when the developer gave one, else the floor plan
+  const unitPlan = UNIT_PLANS && UNIT_PLANS[ty.key] && h.final != null ? UNIT_PLANS[ty.key][String(h.final).padStart(2, '0')] : null;
+  const plan = unitPlan || prop.plan || state.registry?.plans?.[h.type]?.file || ty.plan;
   $('panel-plan').src = plan ? imageUrl(`assets/plans/${plan}`) : '';
   document.querySelector('.plan-section').hidden = !plan;   // no floor plan for this type yet
-  $('panel-plan-name').textContent = plan ? (ty.planLabel ? (ty.planLabel[state.lang] || ty.planLabel.pt) : `${prop.planName || ''} · ${ty.beds} ${t('beds')} · ${ty.baths} ${t('baths')}${ty.units > 1 ? ` · ${t('perUnit')}` : ''}`) : '';
+  $('panel-plan-name').textContent = plan ? (unitPlan ? `${t('plan')} · ${t('final')} ${String(h.final).padStart(2, '0')} · ${ty.label[state.lang] || ty.label.pt}` : ty.planLabel ? (ty.planLabel[state.lang] || ty.planLabel.pt) : `${prop.planName || ''} · ${ty.beds} ${t('beds')} · ${ty.baths} ${t('baths')}${ty.units > 1 ? ` · ${t('perUnit')}` : ''}`) : '';
   // sales actions: reserve only while available; "sold" for staff; nothing writes without a backend
   const canWrite = api.hasBackend();
   $('btn-reserve').textContent = st === 'reserved' ? t('cancelReservation') : t('reserve');
@@ -2073,7 +2075,7 @@ async function setupTiles3D() {
   const georef = state.satMeta && state.satMeta.georef;
   if (!GOOGLE_TILES.key || !georef) return;
   try {
-    const { createTiles3D } = await import('./tiles3d.js?v=37');
+    const { createTiles3D } = await import('./tiles3d.js?v=39');
     tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH && Math.min(window.innerWidth, window.innerHeight) < 820,
       onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d');
         if (context3d) { context3d.build([tiles3d.group, contextGroup]); for (const ms of [7000, 16000]) setTimeout(() => { if (context3d && tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); }, ms); }
@@ -2204,7 +2206,7 @@ async function setupContext3D() {
   try {
     const [houses, towers, dem] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null), loadJson('data/dem_grid.json').catch(() => null)]);
     if (!houses && !towers) return;
-    const { createContext3D } = await import('./context3d.js?v=37');
+    const { createContext3D } = await import('./context3d.js?v=39');
     context3d = createContext3D({ scene, houses, towers, dem, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
     if (contextGroup) contextGroup.traverse((o) => { if (o.isMesh && /^BUILDINGS_/.test(o.name || '')) o.visible = false; });   // the baked blocks give way to the sampled ones
     if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else context3d.build([contextGroup]);   // no terrain yet: the DEM grid places them, the tiles refine them later

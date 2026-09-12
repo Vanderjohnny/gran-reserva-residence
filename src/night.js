@@ -438,7 +438,7 @@ export function createNight(ctx) {
     S.pools.material.opacity = 0.4 * k; S.pools.visible = k > 0;
     for (const pl of S.points) pl.intensity = LAMP.pointIntensity * k;
     for (const im of Object.values(S.windows)) { im.material.color.set(LAMP.window).multiplyScalar(0.25 + 0.75 * k); im.visible = k > 0; }
-    for (const m of ctx.glassMats || []) m.opacity = lerp(0.82, 0.45, k);   // the lit rooms show through at night
+    for (const m of ctx.glassMats || []) m.opacity = lerp((ctx.glassOpacity && ctx.glassOpacity.day) ?? 0.82, (ctx.glassOpacity && ctx.glassOpacity.night) ?? 0.45, k);   // the lit rooms show through at night (GRANRESERVA: day/night opacity from GLASS)
     if ((k > 0) !== wasOn) ctx.rebuildInstances(true);
     S.lastTarget.set(Infinity, 0, 0);
     if (ctx.onTime) ctx.onTime(t);

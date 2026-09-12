@@ -1,0 +1,13 @@
+{
+ "tipo": {
+  "01": "unit_tipo_01.jpg",
+  "02": "unit_tipo_02.jpg",
+  "03": "unit_tipo_03.jpg",
+  "04": "unit_tipo_04.jpg"
+ },
+ "diferenciado": {
+  "02": "unit_diferenciado_02.jpg",
+  "03": "unit_diferenciado_03.jpg",
+  "04": "unit_diferenciado_04.jpg"
+ }
+}

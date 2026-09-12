@@ -1,1 +1,258 @@
-{}
+{
+ "generated": "2026-09-12",
+ "count": 36,
+ "properties": {
+  "GRR_e8d0f36971ef47db97d690818073371b": {
+   "code": "401",
+   "floor": 3,
+   "type": 2,
+   "final": 1,
+   "area_m2": 72.85
+  },
+  "GRR_660829724faa47bdb0a8c2aa5d6af633": {
+   "code": "402",
+   "floor": 3,
+   "type": 2,
+   "final": 2,
+   "area_m2": 105.39
+  },
+  "GRR_f2a003db1c364716a25b5c11903a9d09": {
+   "code": "403",
+   "floor": 3,
+   "type": 2,
+   "final": 3,
+   "area_m2": 129.88
+  },
+  "GRR_98abab78ed1041b993f8f184d5b75372": {
+   "code": "404",
+   "floor": 3,
+   "type": 2,
+   "final": 4,
+   "area_m2": 98.59
+  },
+  "GRR_38cf5e5a73c3448587a6a5eeb8c23ab0": {
+   "code": "501",
+   "floor": 4,
+   "type": 1,
+   "final": 1,
+   "area_m2": 73.11
+  },
+  "GRR_f05a31bf006c4cf2b17126a3fe7a4758": {
+   "code": "502",
+   "floor": 4,
+   "type": 1,
+   "final": 2,
+   "area_m2": 73.59
+  },
+  "GRR_6c49d058852343008afc6fcd3f2e9a4b": {
+   "code": "503",
+   "floor": 4,
+   "type": 1,
+   "final": 3,
+   "area_m2": 77.94
+  },
+  "GRR_089ee66c35fb4626850f8eb0e8c0dc75": {
+   "code": "504",
+   "floor": 4,
+   "type": 1,
+   "final": 4,
+   "area_m2": 82.61
+  },
+  "GRR_1314c764525544e1a38db612668f85f9": {
+   "code": "601",
+   "floor": 5,
+   "type": 1,
+   "final": 1,
+   "area_m2": 73.11
+  },
+  "GRR_98f4b401bed043f58f2a4beb832bcddf": {
+   "code": "602",
+   "floor": 5,
+   "type": 1,
+   "final": 2,
+   "area_m2": 73.59
+  },
+  "GRR_d2dd341d57c7490cbe69e3bc68a9f3ae": {
+   "code": "603",
+   "floor": 5,
+   "type": 1,
+   "final": 3,
+   "area_m2": 77.94
+  },
+  "GRR_b055690ec88e4bdb8306e01312a11b5f": {
+   "code": "604",
+   "floor": 5,
+   "type": 1,
+   "final": 4,
+   "area_m2": 82.61
+  },
+  "GRR_d8da03c2481d4943a253e32ca75edaf6": {
+   "code": "701",
+   "floor": 6,
+   "type": 1,
+   "final": 1,
+   "area_m2": 73.11
+  },
+  "GRR_87bbdfeb57c446298ec83c7ef1a19bfb": {
+   "code": "702",
+   "floor": 6,
+   "type": 1,
+   "final": 2,
+   "area_m2": 73.59
+  },
+  "GRR_bf494c9a967744f188501ba47b68a6b6": {
+   "code": "703",
+   "floor": 6,
+   "type": 1,
+   "final": 3,
+   "area_m2": 77.94
+  },
+  "GRR_63a4c365f69c420b8027608caa90208d": {
+   "code": "704",
+   "floor": 6,
+   "type": 1,
+   "final": 4,
+   "area_m2": 82.61
+  },
+  "GRR_a619092ada854e2fa58234e5b9f3d344": {
+   "code": "801",
+   "floor": 7,
+   "type": 1,
+   "final": 1,
+   "area_m2": 73.11
+  },
+  "GRR_4f29b0c971884b889f8f997b8eb5f424": {
+   "code": "802",
+   "floor": 7,
+   "type": 1,
+   "final": 2,
+   "area_m2": 73.59
+  },
+  "GRR_37aeb2e6a9854b17914a482f3fd77d3c": {
+   "code": "803",
+   "floor": 7,
+   "type": 1,
+   "final": 3,
+   "area_m2": 77.94
+  },
+  "GRR_2c2981426dc0472d9fd5dd9b0a527fbc": {
+   "code": "804",
+   "floor": 7,
+   "type": 1,
+   "final": 4,
+   "area_m2": 82.61
+  },
+  "GRR_b84cb138dd1145b9b3db25a13aa24dbe": {
+   "code": "901",
+   "floor": 8,
+   "type": 1,
+   "final": 1,
+   "area_m2": 73.11
+  },
+  "GRR_489e64f4bab44d748b01a59dd89ec221": {
+   "code": "902",
+   "floor": 8,
+   "type": 1,
+   "final": 2,
+   "area_m2": 73.59
+  },
+  "GRR_3531983f37cd4efcad21b42ea9a73a60": {
+   "code": "903",
+   "floor": 8,
+   "type": 1,
+   "final": 3,
+   "area_m2": 77.94
+  },
+  "GRR_a096461725a34fd79e3b39d1f9d7afdc": {
+   "code": "904",
+   "floor": 8,
+   "type": 1,
+   "final": 4,
+   "area_m2": 82.61
+  },
+  "GRR_4d84bd556a7c40f2839045e061446fd9": {
+   "code": "1001",
+   "floor": 9,
+   "type": 1,
+   "final": 1,
+   "area_m2": 73.11
+  },
+  "GRR_f2ae21da9387436283cc1ae169becaa9": {
+   "code": "1002",
+   "floor": 9,
+   "type": 1,
+   "final": 2,
+   "area_m2": 73.59
+  },
+  "GRR_8b3812f3f9144c2195d21adb2c81bc23": {
+   "code": "1003",
+   "floor": 9,
+   "type": 1,
+   "final": 3,
+   "area_m2": 77.94
+  },
+  "GRR_74e473c95f734692ac5b3e9542afe498": {
+   "code": "1004",
+   "floor": 9,
+   "type": 1,
+   "final": 4,
+   "area_m2": 82.61
+  },
+  "GRR_ce02b4eacdf7495c92a092a1e4b1ac5a": {
+   "code": "1101",
+   "floor": 10,
+   "type": 1,
+   "final": 1,
+   "area_m2": 73.11
+  },
+  "GRR_f9dc5bd641a549f8bd90fc27db4112ad": {
+   "code": "1102",
+   "floor": 10,
+   "type": 1,
+   "final": 2,
+   "area_m2": 73.59
+  },
+  "GRR_f5a5bd555c534234a1432f82ca449889": {
+   "code": "1103",
+   "floor": 10,
+   "type": 1,
+   "final": 3,
+   "area_m2": 77.94
+  },
+  "GRR_795cc907270e4cfb90dbf0d6c30cfd1e": {
+   "code": "1104",
+   "floor": 10,
+   "type": 1,
+   "final": 4,
+   "area_m2": 82.61
+  },
+  "GRR_ed405ee44f754f41ba02779094b52dca": {
+   "code": "1201",
+   "floor": 11,
+   "type": 1,
+   "final": 1,
+   "area_m2": 73.11
+  },
+  "GRR_eca994881940442bbd5eaa3365eb5bc7": {
+   "code": "1202",
+   "floor": 11,
+   "type": 1,
+   "final": 2,
+   "area_m2": 73.59
+  },
+  "GRR_7b5f1366db8a49e1955c44a6c2eb5147": {
+   "code": "1203",
+   "floor": 11,
+   "type": 1,
+   "final": 3,
+   "area_m2": 77.94
+  },
+  "GRR_0a1ed263983d4e2683e78a1f57ff3d16": {
+   "code": "1204",
+   "floor": 11,
+   "type": 1,
+   "final": 4,
+   "area_m2": 82.61
+  }
+ }
+}

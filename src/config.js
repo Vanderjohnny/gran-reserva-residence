@@ -76,7 +76,7 @@ export const BACKEND = {
 };
 
 // Opening view (three.js coordinates: x east, y up, z south), captured from the viewer on 2026-09-10
-export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
+export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
 
 export const PARCELS = ['T1'];   // towers (one chip per tower when there are several)
 // Blender lot numbers ("Terrenos NNN") that are parks: not selectable, no tooltip, filled with trees (besides the
@@ -367,6 +367,11 @@ export const CAMERA = { maxDistance: 800, lockTarget: true, orbit: { enabled: tr
 export const POI = { edgeKm: 9, nearHide: 260 };   // nearHide: no dots when the camera is closer than 260 m to the building   // every place of the neighbourhood and the city is pinned (one dot per direction)
 // legend: no floor chips and no per-phase status table (user review 2026-09-12; the floors are reached from the apartment panel and the tour)
 export const LEGEND = { floors: false, byPhase: false };
+// humanised plan of each final (assets/plans/unit_<type>_<final>.jpg, tools/prepare_unit_plans.py from the developer's
+// "ap TIPO final 0N" / "ap DIferenciado terraço final 0N" images, 2026-09-12); the 4th-floor final 01 keeps the floor plan
+export const UNIT_PLANS = {"tipo": {"01": "unit_tipo_01.jpg", "02": "unit_tipo_02.jpg", "03": "unit_tipo_03.jpg", "04": "unit_tipo_04.jpg"}, "diferenciado": {"02": "unit_diferenciado_02.jpg", "03": "unit_diferenciado_03.jpg", "04": "unit_diferenciado_04.jpg"}};
+// balcony glass (user review 2026-09-12: less blue, more transparent and reflective)
+export const GLASS = { color: 0xe4ebee, opacity: 0.26, roughness: 0.03, metalness: 0.4, envMapIntensity: 2.4, specularIntensity: 1.0 };
 // night lighting of the building and its street (three.js frame: x east, y up, z = -model y). Street lamps stand on the
 // sidewalk in front of the lot (their light pools mark the Google ground, which is unlit); the facade gets three
 // uplights from the podium roof; warm points in the hall, the leisure floor and the rooftop lounge; the pool glows;
@@ -418,7 +423,7 @@ Object.assign(I18N.en, {
   tour360: '360° tour', tour360Hint: 'Look around the apartment · works with the gyroscope on your phone', leisure360: 'Leisure in 360°', leisureRenders: 'Leisure areas', leisurePlans: 'Leisure plans',
   panoGyro: 'Gyro', panoGyroHint: 'Move the phone to look around', panoGyroDenied: 'Gyroscope permission denied', panoGyroNone: 'No gyroscope on this device', panoTapGyro: 'Tap “Gyro” to look around by moving the phone',
   panoAuto: 'Auto', panoAutoHint: 'Rotate slowly when idle', panoFull: 'Full screen', panoFullHint: 'Full screen', panoNoFull: 'Full screen is not available here', panoVrHint: 'Put the phone in a Cardboard viewer · tap VR again to leave',
-  panoLoadError: 'Could not load this panorama', open360: 'Open in 360°', realization: 'Developer', poweredBy: 'Powered by', markers360: '360° spots',
+  panoLoadError: 'Could not load this panorama', plan: 'Plan', final: 'unit',  open360: 'Open in 360°', realization: 'Developer', poweredBy: 'Powered by', markers360: '360° spots',
   tour: 'Tour', tourEnd: 'Finish', skip: 'Skip intro',
 });
 Object.assign(I18N.pt, {
@@ -428,7 +433,7 @@ Object.assign(I18N.pt, {
   tour360: 'Tour 360°', tour360Hint: 'Olhe ao redor do apartamento · no celular funciona com o giroscópio', leisure360: 'Lazer em 360°', leisureRenders: 'Áreas de lazer', leisurePlans: 'Plantas do lazer',
   panoGyro: 'Giroscópio', panoGyroHint: 'Mova o celular para olhar ao redor', panoGyroDenied: 'Permissão do giroscópio negada', panoGyroNone: 'Este aparelho não tem giroscópio', panoTapGyro: 'Toque em “Giroscópio” para olhar ao redor movendo o celular',
   panoAuto: 'Auto', panoAutoHint: 'Girar devagar quando parado', panoFull: 'Tela cheia', panoFullHint: 'Tela cheia', panoNoFull: 'Tela cheia não disponível aqui', panoVrHint: 'Coloque o celular no óculos Cardboard · toque em VR de novo para sair',
-  panoLoadError: 'Não foi possível carregar esta panorâmica', open360: 'Abrir em 360°', realization: 'Realização', poweredBy: 'Powered by', markers360: 'Pontos 360°',
+  panoLoadError: 'Não foi possível carregar esta panorâmica', plan: 'Planta', final: 'final',  open360: 'Abrir em 360°', realization: 'Realização', poweredBy: 'Powered by', markers360: 'Pontos 360°',
   tour: 'Tour', tourEnd: 'Concluir', skip: 'Pular abertura',
 });
 // ===== GRANRESERVA-END =====
