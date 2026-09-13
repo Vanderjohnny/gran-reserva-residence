@@ -158,8 +158,9 @@ html[lang^="en"] .loader::before { content: 'LOADING...'; animation-name: animlo
   #search { height: 36px; font-size: 14px; border-radius: 12px; padding: 0 12px; }
   #search-results { top: 42px; }
   .topbar-right { margin-left: auto; gap: 5px; flex-wrap: nowrap; }
-  .btn { height: 32px; padding: 0 9px; font-size: 12px; border-radius: 10px; }
-  .btn.ghost { padding: 0 8px; }
+  .btn { height: 27px; padding: 0 7px; font-size: 11px; border-radius: 9px; letter-spacing: 0; }   /* GRANRESERVA-MAIN10: smaller on phones */
+  .btn.ghost { padding: 0 6px; }
+  .topbar-right { gap: 4px; }
   #btn-ao { display: none; }
   #legend { left: 8px; right: 8px; bottom: 8px; width: auto; padding: 6px 8px; border-radius: 12px; }
   #unk-link { position: static; height: auto; background: none; box-shadow: none; backdrop-filter: none; border-radius: 0; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }

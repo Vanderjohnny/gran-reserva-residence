@@ -95,12 +95,18 @@ export function createContext3D({ scene, houses, towers, lot, dem, cityLights, o
       return null;
     };
   }
+  // every block gets its own grey between light and dark (user review 2026-09-13), carried by vertex colours so the
+  // whole neighbourhood stays one draw call per material; the material colour only darkens them at night
   const MAT = {
-    wall: new THREE.MeshStandardMaterial({ color: 0xcfccc6, roughness: 0.9, metalness: 0.0 }),
-    roof: new THREE.MeshStandardMaterial({ color: 0xb9b6b0, roughness: 0.95, metalness: 0.0 }),
-    towerWall: new THREE.MeshStandardMaterial({ color: 0xdedbd6, roughness: 0.8, metalness: 0.05 }),
-    towerRoof: new THREE.MeshStandardMaterial({ color: 0xc4c1bc, roughness: 0.9, metalness: 0.0 }),
+    wall: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, metalness: 0.0, vertexColors: true }),
+    roof: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0.0, vertexColors: true }),
+    towerWall: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, metalness: 0.05, vertexColors: true }),
+    towerRoof: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, metalness: 0.0, vertexColors: true }),
   };
+  const GREY = { min: 0.42, max: 0.9, roof: 0.86 };   // wall grey range (0 black .. 1 white), roof = wall x 0.86
+  let cseed = 4127;
+  const crnd = () => { cseed = (cseed * 1103515245 + 12345) & 0x7fffffff; return cseed / 0x7fffffff; };
+  const pickGrey = () => { const t = crnd(); const g = GREY.min + (GREY.max - GREY.min) * (0.15 + 0.7 * t + 0.15 * crnd()); const tint = 0.97 + 0.06 * crnd(); return [g * tint, g, g / tint]; };
   if (csmSetup) for (const m of Object.values(MAT)) csmSetup(m);
   const group = new THREE.Group(); group.name = 'context3d'; scene.add(group);
   const S = { houses: null, towers: null, building: false, version: 0, source: null, boxes: [], dayTint: 1 };
@@ -142,8 +148,9 @@ export function createContext3D({ scene, houses, towers, lot, dem, cityLights, o
   }
 
   // ------------------------------------------------------------------------------------------- extrusion
-  function extrude(P, base, top, pos, roofPos) {   // P: model [x, y] ring (any winding); walls to pos, roof to roofPos
+  function extrude(P, base, top, pos, roofPos, wcol, rcol) {   // P: model [x, y] ring (any winding); walls to pos, roof to roofPos
     const n = P.length;
+    const g = pickGrey(), n0 = pos.length, r0 = roofPos.length;   // one grey per block, pushed for every vertex added below
     // walls (two triangles per edge, outward facing whatever the winding thanks to DoubleSide-free normal fix below)
     let area2 = 0; for (let i = 0; i < n; i++) { const a = P[i], b = P[(i + 1) % n]; area2 += a[0] * b[1] - b[0] * a[1]; }
     const ccw = area2 > 0;   // model frame (x east, y north): CCW rings have the outside on the right of each edge in three (z = -y)
@@ -161,10 +168,12 @@ export function createContext3D({ scene, houses, towers, lot, dem, cityLights, o
       const cross = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
       if (cross > 0) roofPos.push(a.x, top, a.y, c.x, top, c.y, b.x, top, b.y); else roofPos.push(a.x, top, a.y, b.x, top, b.y, c.x, top, c.y);
     }
+    for (let v = n0; v < pos.length; v += 3) wcol.push(g[0], g[1], g[2]);
+    for (let v = r0; v < roofPos.length; v += 3) rcol.push(g[0] * GREY.roof, g[1] * GREY.roof, g[2] * GREY.roof);
   }
-  function toMesh(pos, mat, name) {
+  function toMesh(pos, col, mat, name) {
     if (!pos.length) return null;
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.computeVertexNormals();
     const m = new THREE.Mesh(g, mat); m.name = name; m.castShadow = false; m.receiveShadow = true; return m;
   }
   const nextFrame = () => new Promise((r) => requestAnimationFrame(r));
@@ -173,8 +182,8 @@ export function createContext3D({ scene, houses, towers, lot, dem, cityLights, o
   // ------------------------------------------------------------------------------------------- build
   async function build(sourceRoot, { chunk = 40 } = {}) {
     if (S.building) return; S.building = true; const version = ++S.version;
-    indexSource(sourceRoot); S.source = sourceRoot;
-    const walls = [], roofs = [], winList = [];
+    indexSource(sourceRoot); S.source = sourceRoot; cseed = 4127;
+    const walls = [], roofs = [], winList = [], wallsCol = [], roofsCol = [];
     const list = (houses && houses.buildings) || [];
     for (let i = 0; i < list.length; i++) {
       const b = list[i]; const P = b.p; const [cx, cy] = b.c;
@@ -187,11 +196,11 @@ export function createContext3D({ scene, houses, towers, lot, dem, cityLights, o
       const base = (samples.length ? Math.min(...samples) : roof - b.h) - 0.25;
       const est = b.h || 6.0;
       const top = Math.max(base + Math.min(Math.max(est, 3.2), 14), roof != null ? Math.min(roof + 0.3, base + 18) : 0);
-      extrude(P, base, top, walls, roofs);
+      extrude(P, base, top, walls, roofs, wallsCol, roofsCol);
       winList.push({ c: b.c, z: [base, top], h: top - base, a: b.a, p: P });
       if ((i % chunk) === chunk - 1) { await nextFrame(); if (version !== S.version) { S.building = false; return; } }
     }
-    const tw = [], tr = [], towerRecs = [];
+    const tw = [], tr = [], twCol = [], trCol = [], towerRecs = [];
     const tl = (towers && towers.buildings) || [];
     for (let i = 0; i < tl.length; i++) {
       const b = tl[i]; const P = b.p; const [cx, cy] = b.c;
@@ -200,12 +209,12 @@ export function createContext3D({ scene, houses, towers, lot, dem, cityLights, o
       const all = samples.concat(c0 != null ? [c0] : []);
       if (!all.length) continue;
       const base = Math.min(...all) - 1.0;
-      extrude(P, base, base + b.h, tw, tr);
+      extrude(P, base, base + b.h, tw, tr, twCol, trCol);
       towerRecs.push({ P, base, h: b.h, cx, cy });
       if ((i % chunk) === chunk - 1) { await nextFrame(); if (version !== S.version) { S.building = false; return; } }
     }
     for (const o of group.children.slice()) { group.remove(o); o.geometry.dispose(); }
-    for (const m of [toMesh(walls, MAT.wall, 'houses-walls'), toMesh(roofs, MAT.roof, 'houses-roofs'), toMesh(tw, MAT.towerWall, 'towers-walls'), toMesh(tr, MAT.towerRoof, 'towers-roofs')]) if (m) group.add(m);
+    for (const m of [toMesh(walls, wallsCol, MAT.wall, 'houses-walls'), toMesh(roofs, roofsCol, MAT.roof, 'houses-roofs'), toMesh(tw, twCol, MAT.towerWall, 'towers-walls'), toMesh(tr, trCol, MAT.towerRoof, 'towers-roofs')]) if (m) group.add(m);
     S.houses = winList.length; S.towers = tl.length; S.building = false;
     if (onWindows) onWindows({ buildings: winList });
     try { buildLights(towerRecs, ground); } catch (e) { console.warn('context3d lights', e); }
@@ -213,7 +222,7 @@ export function createContext3D({ scene, houses, towers, lot, dem, cityLights, o
   function setNight(k) {   // k 0 day .. 1 night: the blocks darken with the sky (they are lit by the scene lights too)
     S.nightK = k;
     const c = 1 - 0.55 * k;
-    MAT.wall.color.setScalar(0.81 * c); MAT.roof.color.setScalar(0.73 * c); MAT.towerWall.color.setScalar(0.87 * c); MAT.towerRoof.color.setScalar(0.77 * c);
+    MAT.wall.color.setScalar(c); MAT.roof.color.setScalar(c); MAT.towerWall.color.setScalar(c); MAT.towerRoof.color.setScalar(c);
     for (const key of Object.keys(LIGHTS)) { const p = LIGHTS[key]; if (!p) continue; p.material.uniforms.uOpacity.value = k; p.material.uniforms.uScale.value = window.innerHeight / 2; p.visible = k > 0.02; }
   }
   return { group, build, setNight, get state() { return S; } };
