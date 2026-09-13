@@ -15,18 +15,18 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // internal modules carry a version query so browsers never pair a new main.js with a cached old module
-import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS, CATALOG } from './config.js?v=45';
-import { createPanoPlayer } from './pano.js?v=45';   // GRANRESERVA-MAIN
-import { createTour } from './tour.js?v=45';   // GRANRESERVA-MAIN2
-import { api } from './api.js?v=45';
-import { createNight } from './night.js?v=45';
-import { createCars } from './cars.js?v=45';
-import { createRegionMap } from './region.js?v=45';
-import { createPois } from './poi.js?v=45';
-import { createPlanes } from './planes.js?v=45';
+import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS, CATALOG } from './config.js?v=46';
+import { createPanoPlayer } from './pano.js?v=46';   // GRANRESERVA-MAIN
+import { createTour } from './tour.js?v=46';   // GRANRESERVA-MAIN2
+import { api } from './api.js?v=46';
+import { createNight } from './night.js?v=46';
+import { createCars } from './cars.js?v=46';
+import { createRegionMap } from './region.js?v=46';
+import { createPois } from './poi.js?v=46';
+import { createPlanes } from './planes.js?v=46';
 
 const THREE_VERSION = '0.170.0';
-const ASSET_V = '2026-09-13a';   // bump when models/textures change so browsers do not keep stale copies
+const ASSET_V = '2026-09-13b';   // bump when models/textures change so browsers do not keep stale copies
 const asset = (url) => `${url}${url.includes('?') ? '&' : '?'}v=${ASSET_V}`;
 // Single-file build (tools/build_single_html.py): every asset is embedded as base64 in window.LH_EMBED and nothing is fetched.
 const EMBED = window.LH_EMBED || null;
@@ -282,7 +282,7 @@ const loadGLB = (url) => new Promise((res, rej) => (embedded(url) ? gltfLoader.p
 const houseGroups = [];      // InstancedMesh list (visible geometry)
 const proxies = [];          // invisible instanced boxes for picking (one per model)
 const modelInfo = {};        // model index -> { center: Vector3 (local three), size }
-let lotLines, hoverLine, selectLine, selectFill;
+let lotLines, hoverLine, selectLine, selectFill, selectBox = null, statusBoxes = null;   // GRANRESERVA-MAIN11
 let night = null, cars = null, regionMap = null, pois = null, planes = null;
 const glassMats = [];   // house window glass (opacity eases at night so the lit windows show)   // night mode / streetlights, moving cars, regional map
 
@@ -1102,6 +1102,9 @@ function buildLots(data) {
   hoverLine.renderOrder = selectLine.renderOrder = 5;
   scene.add(hoverLine, selectLine);
   selectFill = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.22, depthWrite: false }));
+  // GRANRESERVA-MAIN11: apartments — translucent box of the selected unit (colour = its status)
+  selectBox = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0x34a853, transparent: true, opacity: 0.34, depthWrite: false, side: THREE.DoubleSide }));
+  selectBox.visible = false; selectBox.renderOrder = 3; selectBox.matrixAutoUpdate = false; scene.add(selectBox);
   selectFill.rotation.x = -Math.PI / 2;
   selectFill.position.y = 0.05;
   selectFill.visible = false;
@@ -1362,9 +1365,15 @@ function houseFrontDir(h) {
   const info = modelInfo[h.model];
   return info.front.clone().transformDirection(h.matrix).normalize();
 }
+function showSelectBox(h) {
+  if (!selectBox || !h.matrix) return;
+  const c = new THREE.Color(STATUS[statusOf(h)].hex);
+  selectBox.matrix.copy(h.matrix); selectBox.matrixWorldNeedsUpdate = true;
+  selectBox.material.color.copy(c); selectLine.material.color.copy(c); selectBox.visible = true;
+}
 function select(h, fly = true) {
   state.selected = h;
-  if (h.box) { setBoxOutline(selectLine, h.box); selectFill.visible = false; } else { setLineFromPolys(selectLine, h.lotPolys, 0.14); setFillFromPolys(selectFill, h.lotPolys); }
+  if (h.box) { setBoxOutline(selectLine, h.box); selectFill.visible = false; showSelectBox(h); } else { if (selectBox) selectBox.visible = false; selectLine.material.color.set(0xffb347); setLineFromPolys(selectLine, h.lotPolys, 0.14); setFillFromPolys(selectFill, h.lotPolys); }
   renderPanel(h);
   try { history.replaceState(null, '', `#${h.pid ? 'p-' + h.pid.replace(PID_PREFIX, '') : 'casa-' + h.num}`); } catch { /* sandboxed page */ }
   if (fly) flyToHouse(h);
@@ -1386,6 +1395,16 @@ function buildStatusLines() {
       }
     }
   }
+  // GRANRESERVA-MAIN11: reserved / sold apartments also get a translucent box (blue / red); the selected box follows the status
+  const boxed = state.units.filter((h) => h.box && h.matrix && statusOf(h) !== 'available' && isVisibleHouse(h));
+  if (!statusBoxes) {
+    statusBoxes = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.24, depthWrite: false, side: THREE.DoubleSide }), Math.max(1, state.units.length));
+    statusBoxes.renderOrder = 2; statusBoxes.frustumCulled = false; scene.add(statusBoxes);
+  }
+  boxed.forEach((h, k) => { statusBoxes.setMatrixAt(k, h.matrix); statusBoxes.setColorAt(k, new THREE.Color(STATUS[statusOf(h)].hex)); });
+  statusBoxes.count = boxed.length; statusBoxes.visible = boxed.length > 0; statusBoxes.instanceMatrix.needsUpdate = true;
+  if (statusBoxes.instanceColor) statusBoxes.instanceColor.needsUpdate = true;
+  if (state.selected && state.selected.box) showSelectBox(state.selected);
   if (!statusLines) {
     statusLines = new LineSegments2(new LineSegmentsGeometry(), new LineMaterial({ vertexColors: true, linewidth: 3, transparent: true, opacity: 0.95, depthTest: false, resolution: new THREE.Vector2(window.innerWidth, window.innerHeight) }));
     statusLines.renderOrder = 4;
@@ -1400,7 +1419,7 @@ function buildStatusLines() {
 }
 function clearSelection() {
   state.selected = null;
-  selectLine.visible = selectFill.visible = false;
+  selectLine.visible = selectFill.visible = false; if (selectBox) selectBox.visible = false;
   document.getElementById('panel').classList.remove('open');
   try { history.replaceState(null, '', location.pathname + location.search); } catch { /* sandboxed page */ }
 }
@@ -2075,7 +2094,7 @@ async function setupTiles3D() {
   const georef = state.satMeta && state.satMeta.georef;
   if (!GOOGLE_TILES.key || !georef) return;
   try {
-    const { createTiles3D } = await import('./tiles3d.js?v=45');
+    const { createTiles3D } = await import('./tiles3d.js?v=46');
     tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH && Math.min(window.innerWidth, window.innerHeight) < 820,
       onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d');
         if (context3d) { context3d.build([tiles3d.group, contextGroup]); for (const ms of [7000, 16000]) setTimeout(() => { if (context3d && tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); }, ms); }
@@ -2206,7 +2225,7 @@ async function setupContext3D() {
   try {
     const [houses, towers, dem, cityLights] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null), loadJson('data/dem_grid.json').catch(() => null), loadJson('data/city_lights.json').catch(() => null)]);
     if (!houses && !towers) return;
-    const { createContext3D } = await import('./context3d.js?v=45');
+    const { createContext3D } = await import('./context3d.js?v=46');
     context3d = createContext3D({ scene, houses, towers, dem, cityLights, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
     if (contextGroup) contextGroup.traverse((o) => { if (o.isMesh && /^BUILDINGS_/.test(o.name || '')) o.visible = false; });   // the baked blocks give way to the sampled ones
     if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else context3d.build([contextGroup]);   // no terrain yet: the DEM grid places them, the tiles refine them later
