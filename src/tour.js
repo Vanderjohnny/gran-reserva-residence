@@ -31,7 +31,7 @@ export function createTour({ stops, flyTo, t, lang, setFloor, selectUnit, clearS
   }
   function apply(st) {
     clearTimeout(S.timer);
-    if (st.floor !== undefined) setFloor(st.floor, st.reveal);   // GRANRESERVA-MAIN13: optional reveal mode ('hide' = clean cut)
+    if (st.floor !== undefined) setFloor(st.floor, st.reveal, st);   // GRANRESERVA-MAIN13/14: reveal mode, wall cut (cut) and floor plan (plan) of the stop
     setTime(st.time !== undefined ? st.time : 0);   // GRANRESERVA-MAIN13: stops without a time are daylight
     if (st.unit) selectUnit(st.unit); else clearSelection();
     const ms = st.ms || 2200;

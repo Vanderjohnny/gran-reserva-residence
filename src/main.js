@@ -15,18 +15,18 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // internal modules carry a version query so browsers never pair a new main.js with a cached old module
-import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS, CATALOG } from './config.js?v=48';
-import { createPanoPlayer } from './pano.js?v=48';   // GRANRESERVA-MAIN
-import { createTour } from './tour.js?v=48';   // GRANRESERVA-MAIN2
-import { api } from './api.js?v=48';
-import { createNight } from './night.js?v=48';
-import { createCars } from './cars.js?v=48';
-import { createRegionMap } from './region.js?v=48';
-import { createPois } from './poi.js?v=48';
-import { createPlanes } from './planes.js?v=48';
+import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS, CATALOG, FLOOR_PLANS_3D } from './config.js?v=49';
+import { createPanoPlayer } from './pano.js?v=49';   // GRANRESERVA-MAIN
+import { createTour } from './tour.js?v=49';   // GRANRESERVA-MAIN2
+import { api } from './api.js?v=49';
+import { createNight } from './night.js?v=49';
+import { createCars } from './cars.js?v=49';
+import { createRegionMap } from './region.js?v=49';
+import { createPois } from './poi.js?v=49';
+import { createPlanes } from './planes.js?v=49';
 
 const THREE_VERSION = '0.170.0';
-const ASSET_V = '2026-09-13c';   // bump when models/textures change so browsers do not keep stale copies
+const ASSET_V = '2026-09-13d';   // bump when models/textures change so browsers do not keep stale copies
 const asset = (url) => `${url}${url.includes('?') ? '&' : '?'}v=${ASSET_V}`;
 // Single-file build (tools/build_single_html.py): every asset is embedded as base64 in window.LH_EMBED and nothing is fetched.
 const EMBED = window.LH_EMBED || null;
@@ -89,6 +89,7 @@ const IS_TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 document.body.classList.toggle('touch', IS_TOUCH);
 const IS_PHONE = () => window.innerWidth <= 640;
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.localClippingEnabled = true;   // GRANRESERVA-MAIN14: floor cuts of the tour
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_TOUCH ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -452,7 +453,8 @@ function setupBuilding(gltf) {
     for (const m of (Array.isArray(o.material) ? o.material : [o.material])) {
       if (/GR_GLASS/i.test(m.name || '')) { const G = GLASS || {}; m.transparent = true; m.opacity = G.opacity ?? 0.42; m.roughness = G.roughness ?? 0.06; m.metalness = G.metalness ?? 0.25; m.color.set(G.color ?? 0x9fb6c6); m.envMapIntensity = G.envMapIntensity ?? 1.6; if (G.specularIntensity != null && 'specularIntensity' in m) m.specularIntensity = G.specularIntensity; glassMats.push(m); }   // GRANRESERVA-MAIN9
       if (/GR_WATER/i.test(m.name || '')) { m.transparent = true; m.opacity = 0.85; m.roughness = 0.04; m.metalness = 0.1; m.color.set(0x3f9bb5); }
-      if (/GR_TILE90/i.test(m.name || '')) { m.map = tileTexture(); m.color.set(0xffffff); m.roughness = 0.5; boxUV(o.geometry, 0.9, false, 'uv'); }   // terrace floors: 90 x 90 ceramic tiles
+      if (/GR_TILE90C/i.test(m.name || '')) { m.map = tileTexture('cement'); m.color.set(0xffffff); m.roughness = 0.6; boxUV(o.geometry, 0.9, false, 'uv'); }   // GRANRESERVA-MAIN15: leisure / rooftop floors: 90 x 90 light cement tiles
+      else if (/GR_TILE90/i.test(m.name || '')) { m.map = tileTexture(); m.color.set(0xffffff); m.roughness = 0.5; boxUV(o.geometry, 0.9, false, 'uv'); }   // terrace floors: 90 x 90 ceramic tiles
       if (/\bLED\d?\b|Luz LED|LED POOL|LED_STRIP/i.test(m.name || '') && m.emissive) { ledMats.push(m); m.userData.dayColor = m.color.clone(); m.emissive.set(0xffc27a); m.emissiveIntensity = 0; m.toneMapped = false; }
       if (m.transparent) { m.depthWrite = false; o.castShadow = false; } m.side = THREE.DoubleSide;
     }
@@ -474,6 +476,7 @@ function setupBuilding(gltf) {
 // floors above the selected one: ghosted (transparent), hidden or lifted (BUILDING.reveal)
 function applyFloorReveal() {
   const sel = state.floor, mode = state.revealMode || (BUILDING && BUILDING.reveal) || 'ghost';   // GRANRESERVA-MAIN13: a tour stop may force 'hide'
+  for (const f of floorNodes) if (f.n !== sel || state.cutBelow == null) setCut(f, null);   // GRANRESERVA-MAIN14
   for (const f of floorNodes) {
     const above = sel != null && f.n > sel;
     if (mode === 'hide') { f.node.visible = !above; setGhost(f, false); f.targetY = 0; }
@@ -482,6 +485,46 @@ function applyFloorReveal() {
   }
   const cut = sel == null ? null : floorNodes.find((f) => f.n === sel);
   for (const m of staticMeshes) m.visible = sel == null || !(cut && cut.z1 != null && m.userData.topY > cut.z1 + 0.3);   // GRANRESERVA-MAIN13
+  if (cut && state.cutBelow != null) setCut(cut, cutHeight(cut));
+  applyFloorPlan();
+}
+// GRANRESERVA-MAIN14: horizontal section of a floor — its meshes get cloned materials clipped above `y` (world metres)
+function cutHeight(f) {   // top of the storey = finished floor of the next storey (bottom of its unit boxes), else the next node's bottom
+  const nextUnits = state.units.filter((u) => u.floor === f.n + 1 && u.box);
+  const next = floorNodes.find((g) => g.n === f.n + 1);
+  const top = nextUnits.length ? Math.min(...nextUnits.map((u) => u.box.center[2] - u.box.size[2] / 2)) : (next && next.z0 != null ? next.z0 : f.z1);
+  return top - state.cutBelow;
+}
+function setCut(f, y) {
+  if ((f.cut == null && y == null) || f.cut === y) return;
+  f.cut = y;
+  f.node.traverse((o) => {
+    if (!o.isMesh) return;
+    if (y == null) { if (o.userData.cutMat) { o.material = o.userData.uncutMat; o.userData.cutMat = null; } return; }
+    if (!o.userData.cutMat) o.userData.uncutMat = o.material;
+    const plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), y);
+    const mk = (m) => { const c = m.clone(); c.clippingPlanes = [plane]; c.clipShadows = true; if (csm) csm.setupMaterial(c); return c; };
+    o.material = Array.isArray(o.userData.uncutMat) ? o.userData.uncutMat.map(mk) : mk(o.userData.uncutMat); o.userData.cutMat = o.material;
+  });
+}
+// GRANRESERVA-MAIN14: humanised plan laid on the slab of the selected floor (tour stops with `plan: true`)
+const floorPlanMeshes = new Map();
+function applyFloorPlan() {
+  for (const m of floorPlanMeshes.values()) m.visible = false;
+  const sel = state.floor;
+  if (sel == null || !state.showPlan || !FLOOR_PLANS_3D) return;
+  const cfg = FLOOR_PLANS_3D.find((p) => (p.floors || []).includes(sel)); if (!cfg) return;
+  const units = state.units.filter((u) => u.floor === sel && u.box);
+  const z = units.length ? Math.min(...units.map((u) => u.box.center[2] - u.box.size[2] / 2)) : (floorNodes.find((g) => g.n === sel) || {}).z0;
+  if (z == null) return;
+  let m = floorPlanMeshes.get(cfg.file);
+  if (!m) {
+    const tex = new THREE.TextureLoader().load(asset(cfg.file)); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+    m = new THREE.Mesh(new THREE.PlaneGeometry(cfg.x1 - cfg.x0, cfg.y1 - cfg.y0), new THREE.MeshStandardMaterial({ map: tex, roughness: 1, metalness: 0, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
+    m.rotation.x = -Math.PI / 2; m.receiveShadow = true; m.renderOrder = 1; m.name = 'floor-plan'; if (csm) csm.setupMaterial(m.material);
+    scene.add(m); floorPlanMeshes.set(cfg.file, m);
+  }
+  m.position.set((cfg.x0 + cfg.x1) / 2, z + (cfg.lift ?? 0.12), -(cfg.y0 + cfg.y1) / 2); m.visible = true;
 }
 function setGhost(f, on) {
   if (f.ghosted === on) return;
@@ -2008,14 +2051,16 @@ let contextGroup = null, tiles3d = null, pano = null, litGroup = null;
 const litUnits = [], panoMarkers = [], ledMats = [];
 // 90 x 90 cm ceramic tile drawn once on a canvas (one texture = one tile, repeated through planar UVs in metres)
 let _tileTex = null;
-function tileTexture() {
-  if (_tileTex) return _tileTex;
+const _tileTexes = {};   // GRANRESERVA-MAIN15: one canvas per tile look (ceramic / cement)
+function tileTexture(kind = 'ceramic') {
+  if (_tileTexes[kind]) return _tileTexes[kind];
+  const base = kind === 'cement' ? '#d3d3d0' : '#d8d4cb', grout = kind === 'cement' ? '#a4a4a1' : '#a7a39a';
   const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d');
-  g.fillStyle = '#d8d4cb'; g.fillRect(0, 0, S, S);
+  g.fillStyle = base; g.fillRect(0, 0, S, S);
   for (let i = 0; i < 1400; i++) { g.fillStyle = `rgba(${120 + Math.random() * 60 | 0},${115 + Math.random() * 60 | 0},${105 + Math.random() * 60 | 0},0.08)`; g.fillRect(Math.random() * S, Math.random() * S, 2, 2); }
-  g.fillStyle = '#a7a39a'; g.fillRect(0, 0, S, 3); g.fillRect(0, 0, 3, S); g.fillRect(0, S - 3, S, 3); g.fillRect(S - 3, 0, 3, S);
-  _tileTex = new THREE.CanvasTexture(cv); _tileTex.wrapS = _tileTex.wrapT = THREE.RepeatWrapping; _tileTex.colorSpace = THREE.SRGBColorSpace; _tileTex.anisotropy = MAX_ANISO;
-  return _tileTex;
+  g.fillStyle = grout; g.fillRect(0, 0, S, 3); g.fillRect(0, 0, 3, S); g.fillRect(0, S - 3, S, 3); g.fillRect(S - 3, 0, 3, S);
+  const tex = new THREE.CanvasTexture(cv); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = MAX_ANISO; _tileTexes[kind] = tex;
+  return tex;
 }
 function floorName(n) {
   const f = FLOOR_LABELS[n]; if (f) return f[state.lang] || f.pt;
@@ -2100,7 +2145,7 @@ async function setupTiles3D() {
   const georef = state.satMeta && state.satMeta.georef;
   if (!GOOGLE_TILES.key || !georef) return;
   try {
-    const { createTiles3D } = await import('./tiles3d.js?v=48');
+    const { createTiles3D } = await import('./tiles3d.js?v=49');
     tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH && Math.min(window.innerWidth, window.innerHeight) < 820,
       onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d');
         if (context3d) { context3d.build([tiles3d.group, contextGroup]); for (const ms of [7000, 16000]) setTimeout(() => { if (context3d && tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); }, ms); }
@@ -2231,7 +2276,7 @@ async function setupContext3D() {
   try {
     const [houses, towers, dem, cityLights] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null), loadJson('data/dem_grid.json').catch(() => null), loadJson('data/city_lights.json').catch(() => null)]);
     if (!houses && !towers) return;
-    const { createContext3D } = await import('./context3d.js?v=48');
+    const { createContext3D } = await import('./context3d.js?v=49');
     context3d = createContext3D({ scene, houses, towers, dem, cityLights, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
     if (contextGroup) contextGroup.traverse((o) => { if (o.isMesh && /^BUILDINGS_/.test(o.name || '')) o.visible = false; });   // the baked blocks give way to the sampled ones
     if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else context3d.build([contextGroup]);   // no terrain yet: the DEM grid places them, the tiles refine them later
@@ -2361,7 +2406,7 @@ function setupTour() {
   if (!TOUR || !TOUR.length) return;
   tour = createTour({ stops: TOUR, t, lang: () => state.lang, isTouch: IS_TOUCH,
     flyTo: (p, tg, ms) => flyTo(new THREE.Vector3(...p), new THREE.Vector3(...tg), ms),
-    setFloor: (n, reveal) => { state.floor = n; state.revealMode = n == null ? null : (reveal || null); applyFloorReveal(); applyFilter(); buildLegend(); if (night) updateLitUnits(night.t); },   // GRANRESERVA-MAIN13
+    setFloor: (n, reveal, opts) => { state.floor = n; state.revealMode = n == null ? null : (reveal || null); state.cutBelow = n == null ? null : ((opts && opts.cut) || null); state.showPlan = n != null && !!(opts && opts.plan); applyFloorReveal(); applyFilter(); buildLegend(); if (night) updateLitUnits(night.t); },   // GRANRESERVA-MAIN13/14
     selectUnit: (code) => { const u = state.units.find((x) => x.code === String(code)); if (u) select(u, false); },
     clearSelection: () => { if (state.selected) clearSelection(); },
     setTime: (tt) => { if (night) night.animateTo(tt); },
