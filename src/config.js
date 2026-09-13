@@ -76,7 +76,7 @@ export const BACKEND = {
 };
 
 // Opening view (three.js coordinates: x east, y up, z south), captured from the viewer on 2026-09-10
-export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
+export const OVERVIEW = { pos: [-70, 42, 88], target: [2, 16, -14] };   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // captured in the viewer (window.__app.capture())   // null = automatic framing of the site bounds; capture the real one in the viewer later
 
 export const PARCELS = ['T1'];   // towers (one chip per tower when there are several)
 // Blender lot numbers ("Terrenos NNN") that are parks: not selectable, no tooltip, filled with trees (besides the
@@ -341,14 +341,18 @@ export const PANO_LINKS = {
 // opening direction of each panorama (player degrees); unset = 0 (the centre of the equirectangular image)
 export const PANO_START = { ap_terraco: 240, ap_terraco_gourmet: 0, apartamento_terraco_pergolado: 0, apartamento_living: 180, apartamento_suite: 240 };
 // 360 badges over the building (Blender metres: x east along the street, y towards the back, z up) -> leisure panoramas
+// 360 markers in model metres (x, y, z): rooftop scenes at 41.2 (floor 39.4), 3º pavimento scenes at 8.4 (floor 6.95).
+// Catalogue p.6 (rooftop): Prainha, Fire Place (lounge), Sala de Jogos (game center), Quiosque Gourmet, Lounge Reserva
+// (lazer fundos); p.5 (3º pavimento): Academia x 2.4..7.5 / y 18.4..23.1, Salão de Festas x 3.2..9.9 / y 6.3..13.9
+// (the left half x < -0.4 of the 3º is Garagem 02 — no scene there). User review 2026-09-13.
 export const PANO_MARKERS = [
   { pano: 'piscina_prainha', pos: [-4.5, 16.0, 41.2] },
-  { pano: 'lounge_rooftop', pos: [5.5, 13.0, 41.2] },
-  { pano: 'academia', pos: [-4.0, 22.0, 8.4] },
-  { pano: 'festas', pos: [-2.0, 10.0, 8.4] },
-  { pano: 'game_center', pos: [4.5, 17.0, 8.4] },
-  { pano: 'gourmet_fundos', pos: [2.0, 26.5, 8.4] },
-  { pano: 'lazer_fundos', pos: [9.0, 27.0, 8.4] },
+  { pano: 'lounge_rooftop', pos: [5.5, 12.5, 41.2] },
+  { pano: 'game_center', pos: [6.3, 16.5, 41.2] },
+  { pano: 'gourmet_fundos', pos: [5.8, 22.0, 41.2] },
+  { pano: 'lazer_fundos', pos: [8.4, 24.8, 41.2] },
+  { pano: 'academia', pos: [5.0, 21.0, 8.4] },
+  { pano: 'festas', pos: [6.5, 10.5, 8.4] },
 ];
 // Google Photorealistic 3D Tiles (src/tiles3d.js): key from Google Maps Platform with the Map Tiles API enabled and the
 // HTTP referrers restricted to the site domains (+ localhost for tests). Empty key = fallback context only.
