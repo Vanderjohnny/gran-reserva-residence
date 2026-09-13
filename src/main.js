@@ -15,15 +15,15 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // internal modules carry a version query so browsers never pair a new main.js with a cached old module
-import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS, CATALOG } from './config.js?v=47';
-import { createPanoPlayer } from './pano.js?v=47';   // GRANRESERVA-MAIN
-import { createTour } from './tour.js?v=47';   // GRANRESERVA-MAIN2
-import { api } from './api.js?v=47';
-import { createNight } from './night.js?v=47';
-import { createCars } from './cars.js?v=47';
-import { createRegionMap } from './region.js?v=47';
-import { createPois } from './poi.js?v=47';
-import { createPlanes } from './planes.js?v=47';
+import { TYPES, PDF_TYPE, MODEL_KIND, COLOR_LABEL, IMAGE_COLOR, imageFor, I18N, SQFT_PER_M2, PARCELS, STATUS, BACKEND, PARK_LOTS, OVERVIEW, OPEN_PARCELS, IMAGE_KIND, LEISURE, PID_PREFIX, TYPOLOGY, BUILDING, PANOS, PANO_LINKS, PANO_START, PANO_MARKERS, GOOGLE_TILES, LEISURE_PLANS, DEVELOPER, FLOOR_LABELS, APARTMENT_FLOORS, TOUR, INTRO, SUN_ROTATION_DEG, CAMERA, NIGHT_LIGHTS, POI, LEGEND, UNIT_PLANS, GLASS, CATALOG } from './config.js?v=48';
+import { createPanoPlayer } from './pano.js?v=48';   // GRANRESERVA-MAIN
+import { createTour } from './tour.js?v=48';   // GRANRESERVA-MAIN2
+import { api } from './api.js?v=48';
+import { createNight } from './night.js?v=48';
+import { createCars } from './cars.js?v=48';
+import { createRegionMap } from './region.js?v=48';
+import { createPois } from './poi.js?v=48';
+import { createPlanes } from './planes.js?v=48';
 
 const THREE_VERSION = '0.170.0';
 const ASSET_V = '2026-09-13c';   // bump when models/textures change so browsers do not keep stale copies
@@ -434,7 +434,7 @@ function prepareBuildingData(data) {
   });
   state.unitByPid = new Map(state.units.map((u) => [u.pid, u]));
 }
-let floorNodes = [];
+let floorNodes = [], staticMeshes = [];   // GRANRESERVA-MAIN13: building meshes outside the floor nodes
 const towerCentres = new Map();
 function towerCenter(h) {
   if (!towerCentres.has(h.parcel)) {
@@ -459,6 +459,10 @@ function setupBuilding(gltf) {
   });
   scene.add(root);
   floorNodes = state.floors.map((f) => ({ ...f, node: root.getObjectByName(f.node || `floor_${String(f.n).padStart(2, '0')}`), ghosted: false, targetY: null })).filter((f) => f.node);
+  // GRANRESERVA-MAIN13: meshes not under a floor node (the slatted mullion of the facade) get their top height so a floor
+  // cut can hide them when they rise above the cut
+  for (const f of floorNodes) f.node.traverse((o) => { o.userData.floorN = f.n; });
+  staticMeshes = []; root.traverse((o) => { if (o.isMesh && o.userData.floorN == null) { o.userData.topY = new THREE.Box3().setFromObject(o).max.y; staticMeshes.push(o); } });
   // picking: one instanced box per unit (its Blender box: centre, size, rotation)
   const proxy = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true }), Math.max(1, state.units.length));
   proxy.visible = false; proxy.frustumCulled = false; proxy.userData = { houses: state.units };
@@ -469,13 +473,15 @@ function setupBuilding(gltf) {
 }
 // floors above the selected one: ghosted (transparent), hidden or lifted (BUILDING.reveal)
 function applyFloorReveal() {
-  const sel = state.floor, mode = (BUILDING && BUILDING.reveal) || 'ghost';
+  const sel = state.floor, mode = state.revealMode || (BUILDING && BUILDING.reveal) || 'ghost';   // GRANRESERVA-MAIN13: a tour stop may force 'hide'
   for (const f of floorNodes) {
     const above = sel != null && f.n > sel;
     if (mode === 'hide') { f.node.visible = !above; setGhost(f, false); f.targetY = 0; }
     else if (mode === 'explode') { f.node.visible = true; setGhost(f, false); f.targetY = above ? (f.n - sel) * ((BUILDING && BUILDING.explodeGap) || 2.5) : 0; }
     else { f.node.visible = !(above && f.n > sel + 3); setGhost(f, above); f.targetY = 0; }   // ghost the next 3 floors, hide the rest (a 13-floor stack of ghosts is a white block)
   }
+  const cut = sel == null ? null : floorNodes.find((f) => f.n === sel);
+  for (const m of staticMeshes) m.visible = sel == null || !(cut && cut.z1 != null && m.userData.topY > cut.z1 + 0.3);   // GRANRESERVA-MAIN13
 }
 function setGhost(f, on) {
   if (f.ghosted === on) return;
@@ -2094,7 +2100,7 @@ async function setupTiles3D() {
   const georef = state.satMeta && state.satMeta.georef;
   if (!GOOGLE_TILES.key || !georef) return;
   try {
-    const { createTiles3D } = await import('./tiles3d.js?v=47');
+    const { createTiles3D } = await import('./tiles3d.js?v=48');
     tiles3d = createTiles3D({ scene, camera, renderer, cfg: GOOGLE_TILES, georef, touch: IS_TOUCH && Math.min(window.innerWidth, window.innerHeight) < 820,
       onReady: () => { if (contextGroup) contextGroup.visible = false; for (const m of satMeshes) m.visible = false; worldGround.visible = false; document.body.classList.add('tiles3d');
         if (context3d) { context3d.build([tiles3d.group, contextGroup]); for (const ms of [7000, 16000]) setTimeout(() => { if (context3d && tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); }, ms); }
@@ -2225,7 +2231,7 @@ async function setupContext3D() {
   try {
     const [houses, towers, dem, cityLights] = await Promise.all([loadJson('data/context_buildings.json').catch(() => null), loadJson('data/context_towers.json').catch(() => null), loadJson('data/dem_grid.json').catch(() => null), loadJson('data/city_lights.json').catch(() => null)]);
     if (!houses && !towers) return;
-    const { createContext3D } = await import('./context3d.js?v=47');
+    const { createContext3D } = await import('./context3d.js?v=48');
     context3d = createContext3D({ scene, houses, towers, dem, cityLights, lot: GOOGLE_TILES.lot, csmSetup: (m) => setupShaded(m), onWindows: (doc) => buildNeighbourWindows(doc) });
     if (contextGroup) contextGroup.traverse((o) => { if (o.isMesh && /^BUILDINGS_/.test(o.name || '')) o.visible = false; });   // the baked blocks give way to the sampled ones
     if (tiles3d && tiles3d.ready) context3d.build([tiles3d.group, contextGroup]); else context3d.build([contextGroup]);   // no terrain yet: the DEM grid places them, the tiles refine them later
@@ -2355,7 +2361,7 @@ function setupTour() {
   if (!TOUR || !TOUR.length) return;
   tour = createTour({ stops: TOUR, t, lang: () => state.lang, isTouch: IS_TOUCH,
     flyTo: (p, tg, ms) => flyTo(new THREE.Vector3(...p), new THREE.Vector3(...tg), ms),
-    setFloor: (n) => { state.floor = n; applyFloorReveal(); applyFilter(); buildLegend(); if (night) updateLitUnits(night.t); },
+    setFloor: (n, reveal) => { state.floor = n; state.revealMode = n == null ? null : (reveal || null); applyFloorReveal(); applyFilter(); buildLegend(); if (night) updateLitUnits(night.t); },   // GRANRESERVA-MAIN13
     selectUnit: (code) => { const u = state.units.find((x) => x.code === String(code)); if (u) select(u, false); },
     clearSelection: () => { if (state.selected) clearSelection(); },
     setTime: (tt) => { if (night) night.animateTo(tt); },
