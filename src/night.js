@@ -89,7 +89,7 @@ export function createNight(ctx) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    S.stars = new THREE.Points(g, new THREE.PointsMaterial({ size: isTouch ? 2.2 : 1.8, sizeAttenuation: false, vertexColors: true, fog: false, transparent: true, opacity: 0, depthWrite: false, depthTest: false }));
+    S.stars = new THREE.Points(g, new THREE.PointsMaterial({ size: isTouch ? 2.2 : 1.8, sizeAttenuation: false, vertexColors: true, fog: false, transparent: true, opacity: 0, depthWrite: false, depthTest: true }));   // GRANRESERVA-MAIN17: depth-tested, so the tower hides the stars
     S.stars.frustumCulled = false; S.stars.visible = false; S.stars.renderOrder = -29;
     scene.add(S.stars);
 

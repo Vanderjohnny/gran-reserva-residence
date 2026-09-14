@@ -31,7 +31,7 @@ h1, h2, h3, p { margin: 0; }
 .loading-card p { color: rgba(255,255,255,0.88); margin-top: 14px; font-size: 13px; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
 /* text loader under the logotype (cssloaders.github.io, 'text'): one word every 1.2 s, five equal steps so
    the last word is shown as long as the others; the site font instead of Arial */
-.loader { display: inline-block; font-family: 'Montserrat', var(--font); font-weight: 500; font-size: clamp(24px, 5vw, 44px); letter-spacing: 2px; line-height: 1.2; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.6); box-sizing: border-box; min-height: 1.2em; }
+.loader { display: inline-block; font-family: 'Montserrat', var(--font); font-weight: 500; font-size: clamp(14px, 3vw, 26px); letter-spacing: 1.5px;   /* GRANRESERVA-MAIN17: 40 % smaller */ line-height: 1.2; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.6); box-sizing: border-box; min-height: 1.2em; }
 /* Gran Reserva (user text, 2026-09-12): "CARREGANDO.. SEU... NOVO... LAR... AGUARDE...."; English when the page is in EN */
 .loader::before { content: 'CARREGANDO...'; animation: animloader 7.5s steps(1) infinite; }
 @keyframes animloader {
@@ -51,6 +51,7 @@ html[lang^="en"] .loader::before { content: 'LOADING...'; animation-name: animlo
 }
 /* logotype (assets/logo.png: black ink on transparent, inverted at night) */
 .brand-logo { display: block; width: 168px; height: auto; user-select: none; -webkit-user-drag: none; }
+.brand .brand-logo { filter: brightness(0.58) saturate(1.3) contrast(1.25); }   /* GRANRESERVA-MAIN17: darker gold = contrast on the light card */
 .brand-logo.large { width: 100%; margin: 0 auto 24px; filter: drop-shadow(0 8px 28px rgba(0,0,0,0.55)); }   /* Gran Reserva: the logotype is gold on transparent, never inverted */
 
 /* top bar */
@@ -199,3 +200,4 @@ html[lang^="en"] .loader::before { content: 'LOADING...'; animation-name: animlo
 .plan-section[hidden] { display: none; }
 
 body.night .brand-logo { filter: none; }   /* gold logotype stays gold at night */
+body.night .brand .brand-logo { filter: brightness(0.58) saturate(1.3) contrast(1.25); }   /* GRANRESERVA-MAIN17: the header card is light at night too */

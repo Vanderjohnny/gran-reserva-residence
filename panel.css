@@ -32,7 +32,7 @@ body.night .sbp-row:not(.head):nth-child(even), body.night .schip:hover, body.ni
 .title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .status-badge { flex: none; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 9px; border-radius: 999px; color: #fff; background: var(--ok); }
 .status-badge.reserved { background: #2b7de9; }   /* GRANRESERVA-MAIN11: reserved = blue (STATUS.reserved) */
-.status-badge.sold { background: var(--bad); }
+.status-badge.sold { background: #f2c230; color: #2a2100; }   /* GRANRESERVA-MAIN17: sold = yellow (STATUS.sold) */
 .pid-line { font-size: 11px; color: var(--ink-2); margin-top: 6px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .pid-line code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; background: rgba(16,20,24,0.06); padding: 2px 6px; border-radius: 5px; }
 #panel-body { padding: 6px 18px 8px; flex: none; overflow: visible; }
