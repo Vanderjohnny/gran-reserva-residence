@@ -249,7 +249,7 @@ body.night .dev-logo { filter: invert(1) hue-rotate(180deg) brightness(1.4); }
 .tour-dots span.on { background: var(--accent); }
 body.night .tour-dots span { background: rgba(255,255,255,0.25); }
 body.night .tour-dots span.on { background: var(--accent); }
-body.tour-on #controls-hint, body.tour-on #pano-markers { display: none !important; }
+body.tour-on #controls-hint { display: none !important; }   /* GRANRESERVA-MAIN16: the 360 badges stay clickable in the tour */
 #intro-logo { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; pointer-events: none; opacity: 1; transition: opacity 1.6s ease; }
 #intro-logo img { width: min(46vw, 420px); filter: drop-shadow(0 6px 30px rgba(0,0,0,0.55)); }
 #intro-logo.fade { opacity: 0; }
