@@ -16,7 +16,9 @@
     3000
    ],
    "kb": 4699,
-   "kb_2k": 384
+   "kb_2k": 384,
+   "mid": "assets/pano/academia_4k.jpg",
+   "kb_4k": 1708
   },
   {
    "id": "ap_terraco_gourmet",
@@ -34,7 +36,9 @@
     3000
    ],
    "kb": 2331,
-   "kb_2k": 186
+   "kb_2k": 186,
+   "mid": "assets/pano/ap_terraco_gourmet_4k.jpg",
+   "kb_4k": 783
   },
   {
    "id": "ap_terraco",
@@ -52,7 +56,9 @@
     3000
    ],
    "kb": 2223,
-   "kb_2k": 173
+   "kb_2k": 173,
+   "mid": "assets/pano/ap_terraco_4k.jpg",
+   "kb_4k": 748
   },
   {
    "id": "apartamento_terraco_pergolado",
@@ -70,7 +76,9 @@
     3000
    ],
    "kb": 3464,
-   "kb_2k": 321
+   "kb_2k": 321,
+   "mid": "assets/pano/apartamento_terraco_pergolado_4k.jpg",
+   "kb_4k": 1263
   },
   {
    "id": "apartamento_living",
@@ -88,7 +96,9 @@
     3000
    ],
    "kb": 3040,
-   "kb_2k": 220
+   "kb_2k": 220,
+   "mid": "assets/pano/apartamento_living_4k.jpg",
+   "kb_4k": 963
   },
   {
    "id": "apartamento_suite",
@@ -106,7 +116,9 @@
     3000
    ],
    "kb": 3477,
-   "kb_2k": 273
+   "kb_2k": 273,
+   "mid": "assets/pano/apartamento_suite_4k.jpg",
+   "kb_4k": 1184
   },
   {
    "id": "festas",
@@ -124,7 +136,9 @@
     3000
    ],
    "kb": 3032,
-   "kb_2k": 236
+   "kb_2k": 236,
+   "mid": "assets/pano/festas_4k.jpg",
+   "kb_4k": 1023
   },
   {
    "id": "game_center",
@@ -142,7 +156,9 @@
     3000
    ],
    "kb": 3490,
-   "kb_2k": 237
+   "kb_2k": 237,
+   "mid": "assets/pano/game_center_4k.jpg",
+   "kb_4k": 1117
   },
   {
    "id": "gourmet_fundos",
@@ -160,7 +176,9 @@
     3000
    ],
    "kb": 3187,
-   "kb_2k": 323
+   "kb_2k": 323,
+   "mid": "assets/pano/gourmet_fundos_4k.jpg",
+   "kb_4k": 1315
   },
   {
    "id": "lazer_fundos",
@@ -178,7 +196,9 @@
     3000
    ],
    "kb": 2001,
-   "kb_2k": 186
+   "kb_2k": 186,
+   "mid": "assets/pano/lazer_fundos_4k.jpg",
+   "kb_4k": 763
   },
   {
    "id": "lounge_rooftop",
@@ -196,7 +216,9 @@
     3000
    ],
    "kb": 2782,
-   "kb_2k": 208
+   "kb_2k": 208,
+   "mid": "assets/pano/lounge_rooftop_4k.jpg",
+   "kb_4k": 908
   },
   {
    "id": "piscina_kids",
@@ -214,7 +236,9 @@
     3000
    ],
    "kb": 4968,
-   "kb_2k": 414
+   "kb_2k": 414,
+   "mid": "assets/pano/piscina_kids_4k.jpg",
+   "kb_4k": 1835
   },
   {
    "id": "piscina_prainha",
@@ -232,7 +256,9 @@
     3000
    ],
    "kb": 4759,
-   "kb_2k": 399
+   "kb_2k": 399,
+   "mid": "assets/pano/piscina_prainha_4k.jpg",
+   "kb_4k": 1331
   }
  ],
  "apartment": [
