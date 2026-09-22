@@ -143,7 +143,10 @@ html[lang^="en"] .loader::before { content: 'LOADING...'; animation-name: animlo
 .panel-actions .primary { flex: 1; }
 
 @media (max-width: 900px) {
-  #topbar { flex-wrap: wrap; }
+  #topbar { flex-wrap: wrap; align-items: flex-start; }
+  .topbar-right { flex-wrap: wrap; justify-content: flex-end; align-content: flex-start; flex: 1 1 0; min-width: 0; row-gap: 6px; }   /* GRANRESERVA-MAIN22: rows beside the logotype */
+  #credits-base { display: none; }   /* GRANRESERVA-MAIN22: only the Google attribution (required) on small screens */
+  #credits { font-size: 9px; opacity: 0.8; }
   .search-wrap { order: 3; flex: 1 1 100%; }
   .counter { display: none; }
   #legend { width: 240px; }
@@ -158,7 +161,7 @@ html[lang^="en"] .loader::before { content: 'LOADING...'; animation-name: animlo
   .search-wrap { order: 3; flex: 1 1 100%; }
   #search { height: 36px; font-size: 14px; border-radius: 12px; padding: 0 12px; }
   #search-results { top: 42px; }
-  .topbar-right { margin-left: auto; gap: 5px; flex-wrap: nowrap; }
+  .topbar-right { margin-left: auto; gap: 5px; flex-wrap: wrap; justify-content: flex-end; align-content: flex-start; flex: 1 1 0; min-width: 0; }   /* GRANRESERVA-MAIN22: rows beside the logotype (flex-basis 0 = take the space left by the brand and wrap inside it) */
   .btn { height: 27px; padding: 0 7px; font-size: 11px; border-radius: 9px; letter-spacing: 0; }   /* GRANRESERVA-MAIN10: smaller on phones */
   .btn.ghost { padding: 0 6px; }
   .topbar-right { gap: 4px; }
@@ -166,7 +169,7 @@ html[lang^="en"] .loader::before { content: 'LOADING...'; animation-name: animlo
   #legend { left: 8px; right: 8px; bottom: 8px; width: auto; padding: 6px 8px; border-radius: 12px; }
   #unk-link { position: static; height: auto; background: none; box-shadow: none; backdrop-filter: none; border-radius: 0; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
   .unk-logo { height: 32px; }
-  #legend.collapsed #unk-link { display: none; }
+  #legend.collapsed #unk-link { display: block; margin-top: 4px; padding-top: 4px; }   /* GRANRESERVA-MAIN22: UNK always visible */
   #legend h2 { display: none; }
   #legend-items { flex-direction: row; flex-wrap: wrap; gap: 4px; }
   .chip { grid-template-columns: auto 1fr auto; gap: 6px; width: auto; flex: 1 1 44%; padding: 5px 8px; border-radius: 8px; }
@@ -175,7 +178,7 @@ html[lang^="en"] .loader::before { content: 'LOADING...'; animation-name: animlo
   .chip-count { min-width: 0; font-size: 12px; }
   .chip.all { flex: 1 1 100%; padding: 3px; margin-top: 0; font-size: 11px; }
   .hint { display: none; }
-  #compass-wrap { top: 156px; bottom: auto; right: 8px; width: 34px; height: 34px; }
+  #compass-wrap { top: 186px; bottom: auto; right: 8px; width: 34px; height: 34px; }   /* GRANRESERVA-MAIN22: below the taller header */
   #compass { width: 24px; height: 24px; }
   #compass span { top: 11px; font-size: 9px; }
   #credits { right: 8px; left: 8px; bottom: 100px; font-size: 9px; padding: 0; text-align: right; }

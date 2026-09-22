@@ -175,7 +175,7 @@ body.night .icon-btn { background: rgba(255,255,255,0.12); color: #fff; }
 .poi-card-close { top: 8px; right: 8px; width: 28px; height: 28px; font-size: 18px; }
 body.night .poi-facts div { background: rgba(255,255,255,0.08); }
 @media (max-width: 900px) { #poi-card { top: 170px; } }
-@media (max-width: 640px) { #poi-card { top: 132px; left: 8px; right: 8px; width: auto; padding: 10px 10px 8px; } .poi-dot .lbl { font-size: 10px; } .time-row { margin-top: 4px; } .time-row #time-label { min-width: 54px; } }
+@media (max-width: 640px) { /* GRANRESERVA-MAIN22: below the taller header */ #poi-card { top: 176px; left: 8px; right: 8px; width: auto; padding: 10px 10px 8px; } .poi-dot .lbl { font-size: 10px; } .time-row { margin-top: 4px; } .time-row #time-label { min-width: 54px; } }
 /* phases under construction (locked until the access password is accepted) */
 .pchip.locked { opacity: 0.55; }
 .pchip.locked::after { content: '🔒'; font-size: 9px; margin-left: 3px; }
